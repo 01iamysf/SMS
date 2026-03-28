@@ -1,4 +1,4 @@
-# Spectral Singularity - School Management System
+# School Management System
 
 A modern, full-stack school management system designed for attendance tracking, leave management, and academic organization.
 
