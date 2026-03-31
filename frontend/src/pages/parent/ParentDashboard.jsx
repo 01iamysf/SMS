@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Calendar, Award, AlertCircle, ChevronRight, Activity, TrendingUp, History, Bell, ShieldCheck } from 'lucide-react';
+import { Users, Calendar, Award, AlertCircle, ChevronRight, Activity, TrendingUp, History, Bell, ShieldCheck, Menu } from 'lucide-react';
 import ParentSidebar from '../../components/parent/ParentSidebar';
 import NotificationDropdown from '../../components/shared/NotificationDropdown';
+import ThemeToggle from '../../components/shared/ThemeToggle';
 
 const SummaryView = ({ childrenData, selectedChildId, loading }) => {
     if (loading) return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Loading children data...</div>;
@@ -304,6 +305,7 @@ const ParentDashboard = () => {
     const [childrenData, setChildrenData] = useState([]);
     const [selectedChildId, setSelectedChildId] = useState('');
     const [loading, setLoading] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     useEffect(() => {
         const fetchChildrenData = async () => {
@@ -324,18 +326,26 @@ const ParentDashboard = () => {
 
     return (
         <div className="app-container" style={{ background: 'var(--bg-primary)' }}>
-            <ParentSidebar />
-            <main style={{ flex: 1, padding: '1.5rem 2rem 1.5rem 0', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                        <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>Parent Monitoring</h1>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Overview of student attendance and academic commitment.</p>
+            <ParentSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+            <main className="dashboard-main">
+                <header className="glass-panel dashboard-header" style={{ marginBottom: '1rem' }}>
+                    <div className="flex-row-mobile">
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <button className="hamburger-btn" onClick={() => setIsSidebarOpen(true)}>
+                                <Menu size={24} />
+                            </button>
+                            <div>
+                                <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>Parent Monitoring</h1>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', display: 'none' }}>Overview of student attendance.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <div className="dashboard-header-actions">
+                        <ThemeToggle />
                         <NotificationDropdown />
                         <div className="glass-panel" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <TrendingUp size={18} className="text-brand" />
-                            <div style={{ fontSize: '0.875rem', fontWeight: '600' }}>Real-time Sync Active</div>
+                            <div style={{ fontSize: '0.875rem', fontWeight: '600', display: 'none' }}>Real-time Sync Active</div>
                         </div>
                     </div>
                 </header>

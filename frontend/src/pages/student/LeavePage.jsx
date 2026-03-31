@@ -44,9 +44,9 @@ const LeavePage = () => {
     }, {});
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(350px, 1fr) 1.5fr', gap: '2.5rem', alignItems: 'start', maxWidth: '1400px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2.5rem', alignItems: 'flex-start', maxWidth: '1400px', margin: '0 auto' }}>
             {/* Form Section */}
-            <div className="glass-panel animate-fade-in" style={{ padding: '2.5rem', position: 'sticky', top: '2rem' }}>
+            <div className="glass-panel animate-fade-in" style={{ padding: 'clamp(1.25rem, 5vw, 2.5rem)', position: 'sticky', top: '2rem', flex: '1 1 300px', minWidth: 'min(100%, 300px)' }}>
                 <div style={{ marginBottom: '2rem' }}>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--brand-primary)', marginBottom: '0.5rem' }}>Apply for Leave</h2>
                     <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Submit your leave request for coordinator approval.</p>
@@ -60,7 +60,7 @@ const LeavePage = () => {
                 )}
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '1rem' }}>
                         <div>
                             <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Start Date</label>
                             <input type="date" className="input-field" value={leaveData.startDate} onChange={e => setLeaveData({ ...leaveData, startDate: e.target.value })} required />
@@ -79,7 +79,7 @@ const LeavePage = () => {
             </div>
 
             {/* History Section */}
-            <div className="glass-panel animate-fade-in" style={{ padding: '2.5rem' }}>
+            <div className="glass-panel animate-fade-in" style={{ padding: 'clamp(1.25rem, 5vw, 2.5rem)', flex: '1.5 1 400px', minWidth: 'min(100%, 300px)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                     <div>
                         <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--brand-primary)', marginBottom: '0.5rem' }}>Leave History</h2>

@@ -11,8 +11,9 @@ import SubjectsPage from './SubjectsPage';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays } from 'date-fns';
-import { Activity, Calendar as CalendarIcon, ChevronLeft, ChevronRight, X, Shield, Check } from 'lucide-react';
+import { Activity, Calendar as CalendarIcon, ChevronLeft, ChevronRight, X, Shield, Check, Menu } from 'lucide-react';
 import NotificationDropdown from '../../components/shared/NotificationDropdown';
+import ThemeToggle from '../../components/shared/ThemeToggle';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const StudentOverview = () => {
@@ -141,6 +142,47 @@ const StudentOverview = () => {
 
     return (
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* Dashboard Header & Animated Button */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>Student Overview</h2>
+                <motion.button
+                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(236, 72, 153, 0.4)" }}
+                    whileTap={{ scale: 0.95 }}
+                    style={{
+                        position: 'relative',
+                        padding: '0.75rem 1.5rem',
+                        background: 'linear-gradient(135deg, var(--brand-primary), #ec4899)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)'
+                    }}
+                >
+                    <motion.div
+                        animate={{ x: ['-200%', '300%'] }}
+                        transition={{ repeat: Infinity, duration: 2.5, ease: "linear" }}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '40%',
+                            height: '100%',
+                            background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent)',
+                            transform: 'skewX(-20deg)',
+                            zIndex: 1
+                        }}
+                    />
+                    <Activity size={18} style={{ zIndex: 2, position: 'relative' }} />
+                    <span style={{ zIndex: 2, position: 'relative' }}>Generate Report</span>
+                </motion.button>
+            </div>
+
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', alignItems: 'flex-start' }}>
                 {/* LEFT: Stats */}
                 <div style={{ flex: '1 1 0%', minWidth: '300px' }}>
@@ -313,14 +355,22 @@ const StudentOverview = () => {
 };
 const StudentDashboard = () => {
     const { user } = useAuth();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     return (
         <div className="app-container" style={{ background: 'var(--bg-primary)' }}>
-            <StudentSidebar />
-            <main style={{ flex: 1, padding: '1rem 2rem 1rem 0', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <StudentSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+            <main className="dashboard-main">
 
-                <header className="glass-panel" style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 50 }}>
-                    <h1 style={{ fontSize: '1.5rem', fontWeight: '600' }}>Student Portal</h1>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                <header className="glass-panel dashboard-header">
+                    <div className="flex-row-mobile">
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <button className="hamburger-btn" onClick={() => setIsSidebarOpen(true)}>
+                                <Menu size={24} />
+                            </button>
+                            <h1 style={{ fontSize: '1.5rem', fontWeight: '600' }}>Student Portal</h1>
+                        </div>
+                    </div>
+                    <div className="dashboard-header-actions">
                         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }} className="group">
                             <div style={{
                                 padding: '0.5rem',
@@ -359,6 +409,7 @@ const StudentDashboard = () => {
                             </div>
                         </div>
 
+                        <ThemeToggle />
                         <NotificationDropdown />
                         <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800' }}>
                             {user?.name?.charAt(0) || 'S'}

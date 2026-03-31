@@ -1,8 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, Calendar, PenTool, Users, ShieldCheck } from 'lucide-react';
+import { LogOut, Calendar, PenTool, Users, ShieldCheck, X } from 'lucide-react';
 
-const TeacherSidebar = () => {
+const TeacherSidebar = ({ isOpen, setIsOpen }) => {
     const { logout, user } = useAuth();
     const location = useLocation();
 
@@ -22,15 +22,22 @@ const TeacherSidebar = () => {
     const links = [...baseLinks, ...coordinatorLinks];
 
     return (
-        <div className="glass-panel" style={{ width: '260px', height: 'calc(100vh - 2rem)', margin: '1rem', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <div style={{ padding: '2rem 1.5rem', borderBottom: '1px solid var(--border-color)' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--brand-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--brand-secondary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>T</div>
-                    Educator Portal
-                </h2>
-                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>{user?.name}</p>
-                {user?.classCoordinatorFor && <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.5rem', background: 'var(--accent)', color: 'white', borderRadius: '1rem', marginTop: '0.5rem', display: 'inline-block' }}>Coordinator</span>}
-            </div>
+        <>
+            <div className={`mobile-overlay ${isOpen ? 'open' : ''}`} onClick={() => setIsOpen(false)}></div>
+            <div className={`glass-panel sidebar ${isOpen ? 'open' : ''}`}>
+                <div style={{ padding: '2rem 1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--brand-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--brand-secondary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>T</div>
+                            Educator Portal
+                        </h2>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>{user?.name}</p>
+                        {user?.classCoordinatorFor && <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.5rem', background: 'var(--accent)', color: 'white', borderRadius: '1rem', marginTop: '0.5rem', display: 'inline-block' }}>Coordinator</span>}
+                    </div>
+                    <button className="sidebar-close-btn" onClick={() => setIsOpen(false)}>
+                        <X size={20} />
+                    </button>
+                </div>
 
             <nav style={{ flex: 1, padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {links.map((link) => {
@@ -39,6 +46,7 @@ const TeacherSidebar = () => {
                         <Link
                             key={link.path}
                             to={link.path}
+                            onClick={() => setIsOpen(false)}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem',
                                 borderRadius: 'var(--radius-md)',
@@ -71,6 +79,7 @@ const TeacherSidebar = () => {
                 </button>
             </div>
         </div>
+        </>
     );
 };
 

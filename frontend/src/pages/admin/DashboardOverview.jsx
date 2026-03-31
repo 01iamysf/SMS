@@ -79,6 +79,47 @@ const DashboardOverview = () => {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            {/* Dashboard Header & Animated Button */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>System Overview</h2>
+                <motion.button
+                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(236, 72, 153, 0.4)" }}
+                    whileTap={{ scale: 0.95 }}
+                    style={{
+                        position: 'relative',
+                        padding: '0.75rem 1.5rem',
+                        background: 'linear-gradient(135deg, var(--brand-primary), #ec4899)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)'
+                    }}
+                >
+                    <motion.div
+                        animate={{ x: ['-200%', '300%'] }}
+                        transition={{ repeat: Infinity, duration: 2.5, ease: "linear" }}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '40%',
+                            height: '100%',
+                            background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent)',
+                            transform: 'skewX(-20deg)',
+                            zIndex: 1
+                        }}
+                    />
+                    <Activity size={18} style={{ zIndex: 2, position: 'relative' }} />
+                    <span style={{ zIndex: 2, position: 'relative' }}>Generate Report</span>
+                </motion.button>
+            </div>
+
             {/* Top Stat Cards */}
             <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
                 <StatCard
@@ -118,45 +159,55 @@ const DashboardOverview = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5 }}
                     className="glass-panel"
-                    style={{ flex: 1, minWidth: '350px', padding: '1.5rem' }}
+                    style={{ flex: 1, minWidth: '280px', padding: '1.5rem' }}
                 >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                         <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <TrendingUp size={20} className="text-brand" /> Today's Attendance Snapshot
                         </h3>
-                        <div style={{ display: 'flex', background: 'var(--bg-secondary)', padding: '0.2rem', borderRadius: '10px', gap: '0.2rem' }}>
-                            <button
-                                onClick={() => setActiveTab('students')}
-                                style={{
-                                    padding: '0.35rem 0.75rem',
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    background: activeTab === 'students' ? 'var(--brand-primary)' : 'transparent',
-                                    color: activeTab === 'students' ? 'white' : 'var(--text-secondary)',
-                                    cursor: 'pointer',
-                                    fontSize: '0.75rem',
-                                    fontWeight: '600',
-                                    transition: 'all 0.2s'
-                                }}
-                            >Students</button>
-                            <button
-                                onClick={() => setActiveTab('teachers')}
-                                style={{
-                                    padding: '0.35rem 0.75rem',
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    background: activeTab === 'teachers' ? 'var(--brand-primary)' : 'transparent',
-                                    color: activeTab === 'teachers' ? 'white' : 'var(--text-secondary)',
-                                    cursor: 'pointer',
-                                    fontSize: '0.75rem',
-                                    fontWeight: '600',
-                                    transition: 'all 0.2s'
-                                }}
-                            >Teachers</button>
+                        <div style={{ display: 'flex', background: 'var(--bg-secondary)', padding: '0.2rem', borderRadius: '10px', gap: '0.2rem', position: 'relative' }}>
+                            {[
+                                { id: 'students', label: 'Students' },
+                                { id: 'teachers', label: 'Teachers' }
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    style={{
+                                        position: 'relative',
+                                        zIndex: 1,
+                                        padding: '0.35rem 0.75rem',
+                                        borderRadius: 8,
+                                        border: 'none',
+                                        background: 'transparent',
+                                        color: activeTab === tab.id ? 'white' : 'var(--text-secondary)',
+                                        cursor: 'pointer',
+                                        fontSize: '0.75rem',
+                                        fontWeight: activeTab === tab.id ? '700' : '600',
+                                        transition: 'color 0.2s'
+                                    }}
+                                >
+                                    {tab.label}
+                                    {activeTab === tab.id && (
+                                        <motion.div
+                                            layoutId="dashboardTab"
+                                            style={{
+                                                position: 'absolute',
+                                                inset: 0,
+                                                background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))',
+                                                borderRadius: 8,
+                                                zIndex: -1,
+                                                boxShadow: '0 2px 8px rgba(79, 70, 229, 0.25)'
+                                            }}
+                                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                </button>
+                            ))}
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
                         <div style={{ position: 'relative', width: '120px', height: '120px' }}>
                             <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
                                 <circle cx="18" cy="18" r="16" fill="none" stroke="var(--border-color)" strokeWidth="3" />
@@ -275,9 +326,9 @@ const DashboardOverview = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.6 }}
                     className="glass-panel"
-                    style={{ flex: 1.5, minWidth: '400px', padding: '1.5rem' }}
+                    style={{ flex: 1.5, minWidth: '280px', padding: '1.5rem' }}
                 >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                         <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <Clock size={20} className="text-brand" /> Recent System Logs
                         </h3>
@@ -327,9 +378,9 @@ const DashboardOverview = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.7 }}
                     className="glass-panel"
-                    style={{ flex: 2, minWidth: '400px', padding: '1.5rem' }}
+                    style={{ flex: 2, minWidth: '280px', padding: '1.5rem' }}
                 >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                         <h3 style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <TrendingUp size={20} className="text-brand" /> Teacher Activity Overview
                         </h3>
@@ -404,7 +455,7 @@ const DashboardOverview = () => {
                             </div>
                         ))}
                         {(!stats.teacherPerformance || stats.teacherPerformance.length === 0) && (
-                            <div style={{ gridColumn: 'span 2', textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
                                 No performance data available yet.
                             </div>
                         )}

@@ -164,7 +164,7 @@ const ClassRoster = () => {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             {/* Main Header with Roster Mode Toggles */}
-            <div className="glass-panel animate-fade-in" style={{ padding: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="glass-panel animate-fade-in" style={{ padding: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
                 <div>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <Users className="text-brand-primary" size={28} /> Campus Directory
@@ -173,19 +173,44 @@ const ClassRoster = () => {
                 </div>
 
                 {rosterData.coordinatedRoster && (
-                    <div style={{ display: 'flex', background: 'var(--bg-secondary)', padding: '0.4rem', borderRadius: '1rem', border: '1px solid var(--border-color)' }}>
-                        <button
-                            onClick={() => setActiveTab('coordinated')}
-                            style={{ padding: '0.6rem 1.25rem', borderRadius: '0.75rem', border: 'none', background: activeTab === 'coordinated' ? 'var(--brand-primary)' : 'transparent', color: activeTab === 'coordinated' ? 'white' : 'var(--text-secondary)', fontWeight: '700', cursor: 'pointer', transition: '0.3s' }}
-                        >
-                            Class Coordinator
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('subject')}
-                            style={{ padding: '0.6rem 1.25rem', borderRadius: '0.75rem', border: 'none', background: activeTab === 'subject' ? 'var(--brand-primary)' : 'transparent', color: activeTab === 'subject' ? 'white' : 'var(--text-secondary)', fontWeight: '700', cursor: 'pointer', transition: '0.3s' }}
-                        >
-                            Subject Roster
-                        </button>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', background: 'var(--bg-secondary)', padding: '0.4rem', borderRadius: '1rem', border: '1px solid var(--border-color)', position: 'relative' }}>
+                        {[
+                            { id: 'coordinated', label: 'Class Coordinator' },
+                            { id: 'subject', label: 'Subject Roster' }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                style={{
+                                    position: 'relative',
+                                    zIndex: 1,
+                                    padding: '0.6rem 1.25rem',
+                                    borderRadius: 12,
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: activeTab === tab.id ? 'white' : 'var(--text-secondary)',
+                                    fontWeight: activeTab === tab.id ? '800' : '600',
+                                    cursor: 'pointer',
+                                    transition: 'color 0.3s'
+                                }}
+                            >
+                                {tab.label}
+                                {activeTab === tab.id && (
+                                    <motion.div
+                                        layoutId="classRosterTab"
+                                        style={{
+                                            position: 'absolute',
+                                            inset: 0,
+                                            background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))',
+                                            borderRadius: 12,
+                                            zIndex: -1,
+                                            boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)'
+                                        }}
+                                        transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                                    />
+                                )}
+                            </button>
+                        ))}
                     </div>
                 )}
             </div>
@@ -211,8 +236,8 @@ const ClassRoster = () => {
 
             {/* List Header */}
             <div className="glass-panel animate-fade-in" style={{ padding: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                    <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1.5rem' }}>
+                    <div style={{ flex: '1 1 min-content' }}>
                         <h3 style={{ fontSize: '1.25rem', fontWeight: '800' }}>
                             {activeTab === 'coordinated' ? `${rosterData.coordinatedRoster.class?.className} Students` : `${selectedSession?.class?.className} (${selectedSession?.class?.section})`}
                         </h3>
@@ -220,7 +245,7 @@ const ClassRoster = () => {
                             {activeTab === 'coordinated' ? 'Complete roster for your coordinated class.' : `List updated for the current ${selectedSession?.subject?.subjectName} schedule.`}
                         </p>
                     </div>
-                    <div style={{ position: 'relative', width: '350px' }}>
+                    <div style={{ position: 'relative', width: '100%', maxWidth: '350px' }}>
                         <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }} />
                         <input
                             type="text" placeholder="Search name, roll, email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="input-field"
@@ -230,7 +255,7 @@ const ClassRoster = () => {
                 </div>
 
                 {/* Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
                     {filteredStudents.length > 0 ? filteredStudents.map((student) => (
                         <motion.div
                             layout key={student._id} className="student-card"

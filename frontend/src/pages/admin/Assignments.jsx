@@ -141,7 +141,9 @@ const Assignments = () => {
 
             {/* Navigation Pill */}
             <div style={{
-                display: 'inline-flex',
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.5rem',
                 background: 'var(--bg-secondary)',
                 padding: '0.4rem',
                 borderRadius: '1rem',
@@ -158,7 +160,7 @@ const Assignments = () => {
                         onClick={() => { setActiveTab(tab.id); setMessage({ type: '', text: '' }); }}
                         style={{
                             padding: '0.75rem 1.5rem',
-                            borderRadius: '0.75rem',
+                            borderRadius: 12,
                             border: 'none',
                             background: 'transparent',
                             color: activeTab === tab.id ? 'white' : 'var(--text-secondary)',
@@ -182,7 +184,7 @@ const Assignments = () => {
                                     position: 'absolute',
                                     inset: 0,
                                     background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))',
-                                    borderRadius: '0.75rem',
+                                    borderRadius: 12,
                                     zIndex: -1,
                                     boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)'
                                 }}
@@ -258,7 +260,7 @@ const Assignments = () => {
                             <form onSubmit={handleSubjectSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
 
                                 {/* Section 1: Basic Info */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
                                     <FormGroup label="Department" icon={<Building2 size={16} />}>
                                         <select
                                             className="form-input" required
@@ -284,7 +286,7 @@ const Assignments = () => {
                                     </FormGroup>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
                                     <FormGroup label="Subject Name" icon={<BookOpen size={16} />}>
                                         <select
                                             className="form-input" required disabled={!subjectForm.departmentId}
@@ -470,7 +472,7 @@ const Assignments = () => {
                             }}
                         >
                             <form onSubmit={handleCoordinatorSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
                                     <FormGroup label="Department" icon={<Building2 size={16} />}>
                                         <select
                                             className="form-input" required
@@ -554,6 +556,17 @@ const Assignments = () => {
 
             {/* Global Styles for custom selects and transitions */}
             <style>{`
+                .form-input {
+                    color: var(--text-primary);
+                    width: 100%;
+                    box-sizing: border-box;
+                    font-family: inherit;
+                    transition: all 0.2s ease;
+                }
+                .form-input::placeholder {
+                    color: var(--text-light);
+                    opacity: 0.7;
+                }
                 .form-input:focus {
                     border-color: var(--brand-primary) !important;
                     box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1) !important;

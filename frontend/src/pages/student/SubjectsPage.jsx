@@ -30,8 +30,8 @@ const SubjectsPage = () => {
 
     return (
         <div className="animate-fade-in" style={{ padding: '1rem', maxWidth: '1000px', margin: '0 auto' }}>
-            <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                <div>
+            <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1.5rem' }}>
+                <div style={{ flex: '1 1 250px' }}>
                     <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>My Academic Schedule</h1>
                     <p style={{ color: 'var(--text-secondary)' }}>View your weekly subjects and timetable.</p>
                 </div>
@@ -71,7 +71,7 @@ const SubjectsPage = () => {
             ) : view === 'timetable' ? (
                 <TimetableGrid subjects={subjects} />
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '1.5rem' }}>
                     {subjects.map((subject, index) => (
                         <motion.div
                             key={subject._id}

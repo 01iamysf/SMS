@@ -185,43 +185,64 @@ const UserManage = () => {
                     <UserProfileView user={selectedUser} onBack={() => setSelectedUser(null)} />
                 ) : (
                     <>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
                             <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'var(--brand-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <Users size={24} /> User Management
                             </h2>
 
-                            <div style={{ display: 'flex', background: 'var(--bg-secondary)', padding: '0.25rem', borderRadius: 'var(--radius-md)', overflowX: 'auto' }}>
-                                <button
-                                    onClick={() => setActiveTab('students')}
-                                    style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm)', border: 'none', background: activeTab === 'students' ? 'var(--brand-primary)' : 'transparent', color: activeTab === 'students' ? 'white' : 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
-                                    <Users size={16} /> Students
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('teachers')}
-                                    style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm)', border: 'none', background: activeTab === 'teachers' ? 'var(--brand-primary)' : 'transparent', color: activeTab === 'teachers' ? 'white' : 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
-                                    <Users size={16} /> Teachers
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('parents')}
-                                    style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm)', border: 'none', background: activeTab === 'parents' ? 'var(--brand-primary)' : 'transparent', color: activeTab === 'parents' ? 'white' : 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
-                                    <Users size={16} /> Parents
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('manual')}
-                                    style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm)', border: 'none', background: activeTab === 'manual' ? 'var(--brand-primary)' : 'transparent', color: activeTab === 'manual' ? 'white' : 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
-                                    <Plus size={16} /> Manual Entry
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('csv')}
-                                    style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-sm)', border: 'none', background: activeTab === 'csv' ? 'var(--brand-primary)' : 'transparent', color: activeTab === 'csv' ? 'white' : 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
-                                    <FileText size={16} /> Bulk Upload
-                                </button>
+                            <div style={{ display: 'flex', background: 'var(--bg-secondary)', padding: '0.5rem', borderRadius: 'var(--radius-md)', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+                                {[
+                                    { id: 'students', label: 'Students', icon: <Users size={16} /> },
+                                    { id: 'teachers', label: 'Teachers', icon: <Users size={16} /> },
+                                    { id: 'parents', label: 'Parents', icon: <Users size={16} /> },
+                                    { id: 'manual', label: 'Manual Entry', icon: <Plus size={16} /> },
+                                    { id: 'csv', label: 'Bulk Upload', icon: <FileText size={16} /> }
+                                ].map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        style={{
+                                            position: 'relative',
+                                            zIndex: 1,
+                                            padding: '0.5rem 1rem',
+                                            borderRadius: 8,
+                                            border: 'none',
+                                            background: 'transparent',
+                                            color: activeTab === tab.id ? 'white' : 'var(--text-secondary)',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            transition: 'color 0.2s',
+                                            whiteSpace: 'nowrap',
+                                            flex: '1 1 auto',
+                                            justifyContent: 'center',
+                                            fontWeight: activeTab === tab.id ? '600' : '400'
+                                        }}
+                                    >
+                                        {tab.icon} {tab.label}
+                                        {activeTab === tab.id && (
+                                            <motion.div
+                                                layoutId="userManageActiveTab"
+                                                style={{
+                                                    position: 'absolute',
+                                                    inset: 0,
+                                                    background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))',
+                                                    borderRadius: 8,
+                                                    zIndex: -1,
+                                                    boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)'
+                                                }}
+                                                transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                                            />
+                                        )}
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
                         {activeTab === 'students' && (
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
                                     <select className="input-field" value={filterDept} onChange={e => { setFilterDept(e.target.value); setFilterClass(''); }} style={{ width: '200px' }}>
                                         <option value="">All Departments</option>
                                         {departments.map(d => <option key={d._id} value={d._id}>{d.departmentName}</option>)}
@@ -231,7 +252,7 @@ const UserManage = () => {
                                         {classes.filter(c => c.departmentId?._id === filterDept || c.departmentId === filterDept).map(c => <option key={c._id} value={c._id}>{c.className}</option>)}
                                     </select>
                                 </div>
-                                <div style={{ overflowX: 'auto' }}>
+                                <div className="table-responsive">
                                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                                         <thead>
                                             <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-secondary)' }}>
@@ -273,13 +294,13 @@ const UserManage = () => {
 
                         {activeTab === 'teachers' && (
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
                                     <select className="input-field" value={filterDept} onChange={e => setFilterDept(e.target.value)} style={{ width: '200px' }}>
                                         <option value="">All Departments</option>
                                         {departments.map(d => <option key={d._id} value={d._id}>{d.departmentName}</option>)}
                                     </select>
                                 </div>
-                                <div style={{ overflowX: 'auto' }}>
+                                <div className="table-responsive">
                                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                                         <thead>
                                             <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-secondary)' }}>
@@ -317,7 +338,7 @@ const UserManage = () => {
 
                         {activeTab === 'parents' && (
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                <div style={{ overflowX: 'auto' }}>
+                                <div className="table-responsive">
                                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                                         <thead>
                                             <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-secondary)' }}>
@@ -353,7 +374,7 @@ const UserManage = () => {
 
                         {activeTab === 'manual' && (
                             <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
-                                <form onSubmit={handleManualSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                <form onSubmit={handleManualSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Role *</label>
                                         <select className="input-field" value={manualForm.role} onChange={e => setManualForm({ ...manualForm, role: e.target.value })} required style={{ width: '100%' }}>
@@ -406,7 +427,7 @@ const UserManage = () => {
                                         </>
                                     )}
 
-                                    <div style={{ gridColumn: 'span 2', marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+                                    <div style={{ gridColumn: '1 / -1', marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
                                         <button type="submit" className="btn btn-primary"><Plus size={18} /> Create User</button>
                                     </div>
                                 </form>
@@ -417,12 +438,12 @@ const UserManage = () => {
                             <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px dashed var(--border-color)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px dashed var(--border-color)', flexWrap: 'wrap', gap: '1.5rem' }}>
                                         <div>
                                             <h3 style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '0.5rem' }}>Upload CSV File</h3>
                                             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Please ensure your CSV matches the required columns.</p>
                                         </div>
-                                        <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                                             <button type="button" onClick={downloadTemplate} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                 <Download size={16} /> Template
                                             </button>
@@ -443,7 +464,7 @@ const UserManage = () => {
                                             </div>
 
                                             {csvPreview.length > 0 && (
-                                                <div style={{ overflowX: 'auto', fontSize: '0.875rem' }}>
+                                                <div className="table-responsive" style={{ fontSize: '0.875rem' }}>
                                                     <p style={{ marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Preview (First {csvPreview.length} rows):</p>
                                                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                                                         <thead>

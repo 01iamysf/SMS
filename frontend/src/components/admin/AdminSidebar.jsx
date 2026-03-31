@@ -1,8 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, LayoutDashboard, Users, BookOpen, UserPlus, Settings, Activity, GraduationCap } from 'lucide-react';
+import { LogOut, LayoutDashboard, Users, BookOpen, UserPlus, Settings, Activity, GraduationCap, X } from 'lucide-react';
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ isOpen, setIsOpen }) => {
     const { logout, user } = useAuth();
     const location = useLocation();
 
@@ -17,14 +17,21 @@ const AdminSidebar = () => {
     ];
 
     return (
-        <div className="glass-panel" style={{ width: '260px', height: 'calc(100vh - 2rem)', margin: '1rem', display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0, position: 'sticky', top: '1rem' }}>
-            <div style={{ padding: '2rem 1.5rem', borderBottom: '1px solid var(--border-color)' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--brand-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--brand-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>A</div>
-                    Admin Portal
-                </h2>
-                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>{user?.name}</p>
-            </div>
+        <>
+            <div className={`mobile-overlay ${isOpen ? 'open' : ''}`} onClick={() => setIsOpen(false)}></div>
+            <div className={`glass-panel sidebar ${isOpen ? 'open' : ''}`}>
+                <div style={{ padding: '2rem 1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--brand-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--brand-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>A</div>
+                            Admin Portal
+                        </h2>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>{user?.name}</p>
+                    </div>
+                    <button className="sidebar-close-btn" onClick={() => setIsOpen(false)}>
+                        <X size={20} />
+                    </button>
+                </div>
 
             <nav style={{ flex: 1, padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {links.map((link) => {
@@ -33,6 +40,7 @@ const AdminSidebar = () => {
                         <Link
                             key={link.path}
                             to={link.path}
+                            onClick={() => setIsOpen(false)}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem',
                                 borderRadius: 'var(--radius-md)',
@@ -65,6 +73,7 @@ const AdminSidebar = () => {
                 </button>
             </div>
         </div>
+        </>
     );
 };
 

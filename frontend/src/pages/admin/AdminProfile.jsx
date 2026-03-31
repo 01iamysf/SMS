@@ -166,7 +166,7 @@ const AdminProfile = () => {
                 </div>
             </motion.div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', alignItems: 'stretch' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', alignItems: 'stretch' }}>
                 {/* Profile Form */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
@@ -188,6 +188,7 @@ const AdminProfile = () => {
                                     style={{ paddingLeft: '3rem', opacity: isEditMode ? 1 : 0.7 }}
                                     value={profileForm.name}
                                     onChange={e => setProfileForm({ ...profileForm, name: e.target.value })}
+                                    placeholder="Enter your full name"
                                     required
                                     disabled={!isEditMode}
                                 />
@@ -203,12 +204,13 @@ const AdminProfile = () => {
                                     type="email"
                                     value={profileForm.email}
                                     onChange={e => setProfileForm({ ...profileForm, email: e.target.value })}
+                                    placeholder="admin@example.com"
                                     required
                                     disabled={!isEditMode}
                                 />
                             </div>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
                             <div className="form-group">
                                 <label className="form-label">New Password</label>
                                 <div style={{ position: 'relative' }}>
@@ -234,6 +236,7 @@ const AdminProfile = () => {
                                         type="password"
                                         value={profileForm.confirmPassword}
                                         onChange={e => setProfileForm({ ...profileForm, confirmPassword: e.target.value })}
+                                        placeholder="Repeat new password"
                                         disabled={!isEditMode}
                                     />
                                 </div>

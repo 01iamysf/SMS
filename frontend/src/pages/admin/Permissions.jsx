@@ -138,7 +138,7 @@ const Permissions = () => {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <Shield className="text-brand-secondary" size={28} /> Access Control
@@ -146,45 +146,48 @@ const Permissions = () => {
                     <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Manage system rights and security tokens</p>
                 </div>
 
-                <div className="glass-panel" style={{ display: 'flex', padding: '0.25rem', borderRadius: '0.75rem' }}>
-                    <button
-                        onClick={() => { setActiveTab('individual'); setErrorMsg(''); setSuccessMsg(''); }}
-                        style={{
-                            padding: '0.6rem 1.2rem',
-                            borderRadius: '0.5rem',
-                            border: 'none',
-                            background: activeTab === 'individual' ? 'var(--brand-primary)' : 'transparent',
-                            color: activeTab === 'individual' ? 'white' : 'var(--text-secondary)',
-                            fontSize: '0.85rem',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            transition: 'all 0.3s ease'
-                        }}
-                    >
-                        <User size={16} /> Individual
-                    </button>
-                    <button
-                        onClick={() => { setActiveTab('bulk'); setErrorMsg(''); setSuccessMsg(''); }}
-                        style={{
-                            padding: '0.6rem 1.2rem',
-                            borderRadius: '0.5rem',
-                            border: 'none',
-                            background: activeTab === 'bulk' ? 'var(--brand-primary)' : 'transparent',
-                            color: activeTab === 'bulk' ? 'white' : 'var(--text-secondary)',
-                            fontSize: '0.85rem',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            transition: 'all 0.3s ease'
-                        }}
-                    >
-                        <Layers size={16} /> Bulk Update
-                    </button>
+                <div className="glass-panel" style={{ display: 'flex', padding: '0.25rem', borderRadius: '0.75rem', position: 'relative' }}>
+                    {[
+                        { id: 'individual', label: 'Individual', icon: <User size={16} /> },
+                        { id: 'bulk', label: 'Bulk Update', icon: <Layers size={16} /> }
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => { setActiveTab(tab.id); setErrorMsg(''); setSuccessMsg(''); }}
+                            style={{
+                                position: 'relative',
+                                zIndex: 1,
+                                padding: '0.6rem 1.2rem',
+                                borderRadius: 10,
+                                border: 'none',
+                                background: 'transparent',
+                                color: activeTab === tab.id ? 'white' : 'var(--text-secondary)',
+                                fontSize: '0.85rem',
+                                fontWeight: activeTab === tab.id ? '700' : '600',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                transition: 'color 0.3s ease'
+                            }}
+                        >
+                            {tab.icon} {tab.label}
+                            {activeTab === tab.id && (
+                                <motion.div
+                                    layoutId="permissionsTab"
+                                    style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))',
+                                        borderRadius: 10,
+                                        zIndex: -1,
+                                        boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)'
+                                    }}
+                                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                                />
+                            )}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -195,7 +198,7 @@ const Permissions = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: '2rem' }}
+                        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}
                     >
                         {/* Search Sidebar */}
                         <div className="glass-panel" style={{ padding: '1.5rem', height: 'fit-content' }}>
@@ -262,7 +265,7 @@ const Permissions = () => {
                         <div className="glass-panel" style={{ padding: '2rem' }}>
                             {selectedUser ? (
                                 <>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
                                         <div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
                                                 <UserCheck size={20} className="text-brand-primary" />
@@ -342,7 +345,7 @@ const Permissions = () => {
                         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
                             <h3 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '2rem', textAlign: 'center' }}>Bulk Permission Update</h3>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '3rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.75rem', color: 'var(--brand-primary)' }}>1. TARGET DEPARTMENT (OPTIONAL)</label>
                                     <select

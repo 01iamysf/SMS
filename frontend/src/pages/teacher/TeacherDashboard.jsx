@@ -2,12 +2,13 @@ import { Routes, Route } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { BookOpen, MapPin, Clock, Users, Shield, Check, X } from 'lucide-react';
+import { BookOpen, MapPin, Clock, Users, Shield, Check, X, Menu } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import TeacherSidebar from '../../components/teacher/TeacherSidebar';
 
 import ManualAttendance from './ManualAttendance';
 import NotificationDropdown from '../../components/shared/NotificationDropdown';
+import ThemeToggle from '../../components/shared/ThemeToggle';
 import TimetableGrid from '../../components/shared/TimetableGrid';
 import ClassRoster from './ClassRoster';
 
@@ -33,6 +34,47 @@ const TeacherTimetable = () => {
 
     return (
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* Dashboard Header & Animated Button */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>Teacher Schedule</h2>
+                <motion.button
+                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(236, 72, 153, 0.4)" }}
+                    whileTap={{ scale: 0.95 }}
+                    style={{
+                        position: 'relative',
+                        padding: '0.75rem 1.5rem',
+                        background: 'linear-gradient(135deg, var(--brand-primary), #ec4899)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)'
+                    }}
+                >
+                    <motion.div
+                        animate={{ x: ['-200%', '300%'] }}
+                        transition={{ repeat: Infinity, duration: 2.5, ease: "linear" }}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '40%',
+                            height: '100%',
+                            background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent)',
+                            transform: 'skewX(-20deg)',
+                            zIndex: 1
+                        }}
+                    />
+                    <Clock size={18} style={{ zIndex: 2, position: 'relative' }} />
+                    <span style={{ zIndex: 2, position: 'relative' }}>Generate Report</span>
+                </motion.button>
+            </div>
+
             {subjects.length === 0 ? (
                 <div className="glass-panel" style={{ padding: '4rem', textAlign: 'center' }}>
                     <BookOpen size={48} style={{ margin: '0 auto 1rem', opacity: 0.2 }} />
@@ -84,7 +126,7 @@ const LeaveApprovals = () => {
 
     return (
         <div className="glass-panel animate-fade-in" style={{ padding: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Leave Approvals</h2>
                 <span className="badge badge-primary">{leaves.length} Total Requests</span>
             </div>
@@ -97,7 +139,7 @@ const LeaveApprovals = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {leaves.map((leave) => (
                         <div key={leave._id} className="glass-panel" style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                                 <div>
                                     <h4 style={{ fontWeight: '700', fontSize: '1rem' }}>{leave.userId?.name}</h4>
                                     <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Roll: {leave.userId?.rollNumber}</p>
@@ -163,14 +205,22 @@ const LeaveApprovals = () => {
 
 const TeacherDashboard = () => {
     const { user } = useAuth();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     return (
         <div className="app-container" style={{ background: 'var(--bg-primary)' }}>
-            <TeacherSidebar />
-            <main style={{ flex: 1, padding: '1rem 2rem 1rem 0', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <TeacherSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+            <main className="dashboard-main">
 
-                <header className="glass-panel" style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 50 }}>
-                    <h1 style={{ fontSize: '1.5rem', fontWeight: '600' }}>Educator Overview</h1>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                <header className="glass-panel dashboard-header">
+                    <div className="flex-row-mobile">
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <button className="hamburger-btn" onClick={() => setIsSidebarOpen(true)}>
+                                <Menu size={24} />
+                            </button>
+                            <h1 style={{ fontSize: '1.5rem', fontWeight: '600' }}>Educator Overview</h1>
+                        </div>
+                    </div>
+                    <div className="dashboard-header-actions">
                         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }} className="group">
                             <div style={{
                                 padding: '0.5rem',
@@ -236,6 +286,7 @@ const TeacherDashboard = () => {
                                 <style>{`.group:hover .permissions-tooltip { visibility: visible !important; opacity: 1 !important; transform: translateY(5px); }`}</style>
                             </div>
                         </div>
+                        <ThemeToggle />
                         <NotificationDropdown />
                         <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800' }}>
                             {user?.name?.charAt(0) || 'T'}
@@ -243,7 +294,7 @@ const TeacherDashboard = () => {
                     </div>
                 </header>
 
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0, width: '100%', maxWidth: '100vw' }}>
                     <Routes>
                         <Route path="/" element={<TeacherTimetable />} />
 

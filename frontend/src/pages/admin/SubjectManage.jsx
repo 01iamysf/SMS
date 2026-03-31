@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { BookOpen, Plus, Trash2, Edit2, Search, ChevronRight, ArrowLeft, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 
 const SubjectManage = () => {
     const [subjects, setSubjects] = useState([]);
@@ -131,7 +132,7 @@ const SubjectManage = () => {
     return (
         <div className="animate-fade-in" style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
             {/* Header section */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     {selectedDeptId && (
                         <button
@@ -270,108 +271,111 @@ const SubjectManage = () => {
                 </AnimatePresence>
             )}
 
-            {/* Create/Edit Modal */}
-            <AnimatePresence>
-                {showModal && (
-                    <div style={{
-                        position: 'fixed',
-                        top: '100px', // Clear header with breathing room
-                        left: window.innerWidth > 1024 ? '292px' : 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: 'transparent',
-                        backdropFilter: 'none',
-                        zIndex: 100000,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        pointerEvents: 'auto'
-                    }}>
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95, x: 50 }}
-                            animate={{ opacity: 1, scale: 1, x: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, x: 50 }}
-                            style={{
-                                background: 'white',
-                                padding: '1.5rem',
-                                width: '100%',
-                                maxWidth: '350px',
-                                borderRadius: '24px',
-                                // Maximized left shift to clearly override the subject cards on the left
-                                marginLeft: window.innerWidth > 1024 ? '-220px' : 0,
-                                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 15px 30px -15px rgba(0, 0, 0, 0.2)',
-                                border: '1px solid rgba(0, 0, 0, 0.08)',
-                                position: 'relative',
-                                overflow: 'hidden'
-                            }}
-                        >
-                            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                                <div style={{
-                                    width: '48px', height: '48px', background: 'var(--brand-primary-light)',
-                                    borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    margin: '0 auto 0.75rem auto', color: 'var(--brand-primary)',
-                                    boxShadow: '0 8px 16px rgba(67, 56, 186, 0.15)'
-                                }}>
-                                    <BookOpen size={22} />
-                                </div>
-                                <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
-                                    {isEditing ? 'Edit Subject' : 'New Subject'}
-                                </h2>
-                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                                    {isEditing ? 'Update module details' : 'Configure new module'}
-                                </p>
+            {/* Create/Edit Modal via Portal */
+                createPortal(
+                    <AnimatePresence>
+                        {showModal && (
+                            <div style={{
+                                position: 'fixed',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                backgroundColor: 'rgba(0,0,0,0.5)',
+                                backdropFilter: 'blur(4px)',
+                                zIndex: 100000,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                pointerEvents: 'auto',
+                                padding: '1rem'
+                            }}>
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                    style={{
+                                        background: 'var(--bg-secondary)',
+                                        padding: '2rem',
+                                        width: '100%',
+                                        maxWidth: '400px',
+                                        borderRadius: '24px',
+                                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                                        border: '1px solid var(--border-color)',
+                                        position: 'relative',
+                                        overflow: 'hidden'
+                                    }}
+                                >
+                                    <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                                        <div style={{
+                                            width: '48px', height: '48px', background: 'var(--brand-primary-light)',
+                                            borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            margin: '0 auto 0.75rem auto', color: 'var(--brand-primary)',
+                                            boxShadow: '0 8px 16px rgba(67, 56, 186, 0.15)'
+                                        }}>
+                                            <BookOpen size={22} />
+                                        </div>
+                                        <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
+                                            {isEditing ? 'Edit Subject' : 'New Subject'}
+                                        </h2>
+                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                                            {isEditing ? 'Update module details' : 'Configure new module'}
+                                        </p>
+                                    </div>
+
+                                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        <div className="form-group">
+                                            <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>Subject Name *</label>
+                                            <input
+                                                type="text"
+                                                className="input-field"
+                                                required
+                                                value={form.subjectName}
+                                                onChange={e => setForm({ ...form, subjectName: e.target.value })}
+                                                placeholder="e.g. Mobile Development"
+                                                style={{ height: '42px', fontSize: '0.9rem', padding: '0 1rem' }}
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>Department *</label>
+                                            <select
+                                                className="input-field"
+                                                required
+                                                value={form.departmentId}
+                                                onChange={e => setForm({ ...form, departmentId: e.target.value })}
+                                                style={{ height: '42px', fontSize: '0.9rem', padding: '0 1rem' }}
+                                            >
+                                                <option value="">Choose dept</option>
+                                                {departments.map(d => <option key={d._id} value={d._id}>{d.departmentName}</option>)}
+                                            </select>
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                                            <button
+                                                type="button"
+                                                onClick={handleCloseModal}
+                                                className="btn btn-secondary"
+                                                style={{ flex: 1, height: '44px', fontSize: '0.9rem' }}
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                className="btn btn-primary"
+                                                style={{ flex: 2, height: '44px', fontSize: '0.9rem' }}
+                                            >
+                                                {isEditing ? 'Update' : 'Create'}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </motion.div>
                             </div>
-
-                            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <div className="form-group">
-                                    <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>Subject Name *</label>
-                                    <input
-                                        type="text"
-                                        className="input-field"
-                                        required
-                                        value={form.subjectName}
-                                        onChange={e => setForm({ ...form, subjectName: e.target.value })}
-                                        placeholder="e.g. Mobile Development"
-                                        style={{ height: '42px', fontSize: '0.9rem', padding: '0 1rem' }}
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label className="form-label" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>Department *</label>
-                                    <select
-                                        className="input-field"
-                                        required
-                                        value={form.departmentId}
-                                        onChange={e => setForm({ ...form, departmentId: e.target.value })}
-                                        style={{ height: '42px', fontSize: '0.9rem', padding: '0 1rem' }}
-                                    >
-                                        <option value="">Choose dept</option>
-                                        {departments.map(d => <option key={d._id} value={d._id}>{d.departmentName}</option>)}
-                                    </select>
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                                    <button
-                                        type="button"
-                                        onClick={handleCloseModal}
-                                        className="btn btn-secondary"
-                                        style={{ flex: 1, height: '44px', fontSize: '0.9rem' }}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="btn btn-primary"
-                                        style={{ flex: 2, height: '44px', fontSize: '0.9rem' }}
-                                    >
-                                        {isEditing ? 'Update' : 'Create'}
-                                    </button>
-                                </div>
-                            </form>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+                        )}
+                    </AnimatePresence>,
+                    document.body
+                )
+            }
         </div>
     );
 };

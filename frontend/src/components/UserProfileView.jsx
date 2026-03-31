@@ -501,7 +501,7 @@ const UserProfileView = ({ user, onBack }) => {
                 }} />
 
                 {/* Content Section */}
-                <div style={{ padding: '0 2rem 2rem 2rem', position: 'relative' }}>
+                <div style={{ padding: '0 clamp(1rem, 5vw, 2rem) 2rem clamp(1rem, 5vw, 2rem)', position: 'relative' }}>
 
                     {/* Avatar */}
                     <div style={{
@@ -600,7 +600,7 @@ const UserProfileView = ({ user, onBack }) => {
 
                                     {/* --- PROFILE TAB --- */}
                                     {activeTab === 'profile' && (
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '1.5rem' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '1.5rem' }}>
                                             {/* Academic Information */}
                                             <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: '0.5rem' }}>
                                                 <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)' }}>
@@ -688,7 +688,7 @@ const UserProfileView = ({ user, onBack }) => {
                                                     <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-primary)' }}>Profile Settings</h3>
                                                     <span style={{ fontSize: '0.75rem', background: 'var(--brand-primary)', color: 'white', padding: '0.25rem 0.5rem', borderRadius: '1rem' }}>View Only</span>
                                                 </div>
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 130px), 1fr))', gap: '1rem' }}>
                                                     <div>
                                                         <label style={{ fontSize: '0.75rem', color: 'var(--text-light)', display: 'block', marginBottom: '0.25rem' }}>First Name</label>
                                                         <div className="input-field" style={{ opacity: 0.7, padding: '0.5rem', fontSize: '0.875rem' }}>
@@ -816,9 +816,9 @@ const UserProfileView = ({ user, onBack }) => {
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', alignItems: 'flex-start' }}>
 
                                             {/* LEFT: Stats */}
-                                            <div style={{ flex: '1 1 0%', minWidth: '300px' }}>
+                                            <div style={{ flex: '1 1 0%', minWidth: 'min(100%, 300px)' }}>
                                                 <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: '0.5rem' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                                                         <h3 style={{ fontSize: '1.1rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)' }}>
                                                             <Activity size={18} />
                                                             {profileData?.role === 'student' ? 'Attendance Stats' : 'Teaching Stats'}
@@ -842,7 +842,7 @@ const UserProfileView = ({ user, onBack }) => {
                                                     {profileData?.role === 'student' ? (() => {
                                                         const displayStats = getStudentDisplayStats();
                                                         return (
-                                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', textAlign: 'center' }}>
+                                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 80px), 1fr))', gap: '1rem', textAlign: 'center' }}>
                                                                 <div style={{ background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)' }}>
                                                                     <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--brand-primary)' }}>{displayStats.totalClasses}</div>
                                                                     <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Total</div>
@@ -890,7 +890,7 @@ const UserProfileView = ({ user, onBack }) => {
                                                     {updatingParams && <span style={{ fontSize: '0.875rem', color: 'var(--brand-primary)', fontWeight: '500' }}>Saving changes...</span>}
                                                 </div>
 
-                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1rem' }}>
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '1rem' }}>
                                                     {ALL_SYSTEM_PERMISSIONS.filter(p => profileData?.permissions?.includes(p.id)).map(perm => {
                                                         const isEnabled = true; // Since we filtered, it's always true here
                                                         return (
@@ -1246,8 +1246,8 @@ const UserProfileView = ({ user, onBack }) => {
                                         {allSubjects
                                             .filter(sub => {
                                                 if (profileData?.role !== 'student') return true;
-                                                const studentDeptId = profileData.department?._id || profileData.department;
-                                                const subDeptId = sub.departmentId?._id || sub.departmentId;
+                                                const studentDeptId = profileData?.departmentId?._id || profileData?.departmentId;
+                                                const subDeptId = sub?.departmentId?._id || sub?.departmentId;
                                                 return String(studentDeptId) === String(subDeptId);
                                             })
                                             .map(sub => (

@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { Menu } from 'lucide-react';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import AcademicManage from './AcademicManage';
 import SubjectManage from './SubjectManage';
@@ -7,6 +9,7 @@ import Assignments from './Assignments';
 import Permissions from './Permissions';
 import GlobalSearch from '../../components/shared/GlobalSearch';
 import NotificationDropdown from '../../components/shared/NotificationDropdown';
+import ThemeToggle from '../../components/shared/ThemeToggle';
 import SystemActivity from './SystemActivity';
 import DashboardOverview from './DashboardOverview';
 import AdminProfile from './AdminProfile';
@@ -16,15 +19,24 @@ import { useAuth } from '../../context/AuthContext';
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     return (
         <div className="app-container" style={{ background: 'var(--bg-primary)' }}>
-            <AdminSidebar />
-            <main style={{ flex: 1, padding: '1rem 2rem 1rem 0', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <AdminSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+            <main className="dashboard-main">
 
-                <header className="glass-panel" style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 10 }}>
-                    <h1 style={{ fontSize: '1.5rem', fontWeight: '600' }}>Admin Control Panel</h1>
-                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                <header className="glass-panel dashboard-header">
+                    <div className="flex-row-mobile">
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <button className="hamburger-btn" onClick={() => setIsSidebarOpen(true)}>
+                                <Menu size={24} />
+                            </button>
+                            <h1 style={{ fontSize: '1.5rem', fontWeight: '600' }}>Admin Control Panel</h1>
+                        </div>
+                    </div>
+                    <div className="dashboard-header-actions">
                         <GlobalSearch />
+                        <ThemeToggle />
                         <NotificationDropdown />
                         <div
                             onClick={() => navigate('/admin/profile')}

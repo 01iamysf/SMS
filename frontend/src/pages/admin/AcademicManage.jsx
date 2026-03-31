@@ -76,7 +76,7 @@ const AcademicManage = () => {
             <motion.div className="glass-panel" style={{ padding: '2rem' }} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem', color: 'var(--brand-primary)' }}>Departments</h2>
 
-                <form onSubmit={handleCreateDept} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+                <form onSubmit={handleCreateDept} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
                     <input
                         type="text"
                         className="input-field"
@@ -110,7 +110,7 @@ const AcademicManage = () => {
             <motion.div className="glass-panel" style={{ padding: '2rem' }} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem', color: 'var(--brand-secondary)' }}>Classes</h2>
 
-                <form onSubmit={handleCreateClass} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '1rem', marginBottom: '2rem', alignItems: 'end' }}>
+                <form onSubmit={handleCreateClass} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '2rem', alignItems: 'end' }}>
                     <div>
                         <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Class Name (e.g. CS101-A)</label>
                         <input type="text" className="input-field" value={newClass.className} onChange={e => setNewClass({ ...newClass, className: e.target.value })} required placeholder="Name & Section" />
@@ -129,7 +129,7 @@ const AcademicManage = () => {
                     <button type="submit" className="btn btn-primary" style={{ height: '42px' }}><Plus size={18} /> Add Class</button>
                 </form>
 
-                <div style={{ overflowX: 'auto' }}>
+                <div className="table-responsive">
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>
                             <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-secondary)' }}>

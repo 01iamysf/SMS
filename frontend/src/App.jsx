@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { useEffect } from 'react';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 
@@ -11,6 +12,21 @@ import ParentDashboard from './pages/parent/ParentDashboard';
 
 // Placeholder Imports
 const Unauthorized = () => <div>Unauthorized Route</div>;
+
+const ThemeEnforcer = () => {
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  }, [user]);
+
+  return null;
+};
 
 const RootRedirect = () => {
   const { user, loading } = useAuth();
@@ -30,6 +46,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <ThemeEnforcer />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
