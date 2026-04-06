@@ -41,7 +41,7 @@ app.use('/api/notifications', notificationRoutes);
 // Start Cron Jobs
 runWeeklyJob();
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
     res.send('API is running...');
 });
 

@@ -47,7 +47,7 @@ function App() {
     <AuthProvider>
       <Router>
         <ThemeEnforcer />
-        <Routes>
+        <Routes basename="/sms">
           <Route path="/login" element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 

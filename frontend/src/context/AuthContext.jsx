@@ -4,7 +4,7 @@ import adminAvatar from '../assets/admin_avatar.png';
 import adminCover from '../assets/admin_cover.png';
 
 // Configure Axios defaults
-axios.defaults.baseURL = 'http://localhost:5000/api';
+axios.defaults.baseURL = '/api';
 
 const AuthContext = createContext();
 
