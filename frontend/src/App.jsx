@@ -42,12 +42,15 @@ const RootRedirect = () => {
   }
 };
 
+// Read base path from env — '/' for local dev, '/sms/' for production
+const basePath = import.meta.env.VITE_BASE_PATH || '/';
+
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router basename={basePath}>
         <ThemeEnforcer />
-        <Routes basename="/sms">
+        <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
