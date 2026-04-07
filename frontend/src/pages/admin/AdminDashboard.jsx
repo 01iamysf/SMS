@@ -36,7 +36,6 @@ const AdminDashboard = () => {
                     </div>
                     <div className="dashboard-header-actions">
                         <GlobalSearch />
-                        <ThemeToggle />
                         <NotificationDropdown />
                         <div
                             onClick={() => navigate('/admin/profile')}

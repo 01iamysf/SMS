@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { LogOut, LayoutDashboard, ClipboardList, Flame, CalendarOff, BookOpen, X } from 'lucide-react';
+import ThemeToggle from '../shared/ThemeToggle';
 
 const StudentSidebar = ({ isOpen, setIsOpen }) => {
     const { logout, user } = useAuth();
@@ -28,9 +29,12 @@ const StudentSidebar = ({ isOpen, setIsOpen }) => {
                         <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>{user?.name}</p>
                         <span style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--warning)', display: 'block', marginTop: '0.25rem' }}>🔥 Streak: {user?.streakCount || 0}</span>
                     </div>
-                    <button className="sidebar-close-btn" onClick={() => setIsOpen(false)}>
-                        <X size={20} />
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <ThemeToggle />
+                        <button className="sidebar-close-btn" onClick={() => setIsOpen(false)}>
+                            <X size={20} />
+                        </button>
+                    </div>
                 </div>
 
             <nav style={{ flex: 1, padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

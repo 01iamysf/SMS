@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { LogOut, Calendar, PenTool, Users, ShieldCheck, X } from 'lucide-react';
+import ThemeToggle from '../shared/ThemeToggle';
 
 const TeacherSidebar = ({ isOpen, setIsOpen }) => {
     const { logout, user } = useAuth();
@@ -34,9 +35,12 @@ const TeacherSidebar = ({ isOpen, setIsOpen }) => {
                         <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>{user?.name}</p>
                         {user?.classCoordinatorFor && <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.5rem', background: 'var(--accent)', color: 'white', borderRadius: '1rem', marginTop: '0.5rem', display: 'inline-block' }}>Coordinator</span>}
                     </div>
-                    <button className="sidebar-close-btn" onClick={() => setIsOpen(false)}>
-                        <X size={20} />
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <ThemeToggle />
+                        <button className="sidebar-close-btn" onClick={() => setIsOpen(false)}>
+                            <X size={20} />
+                        </button>
+                    </div>
                 </div>
 
             <nav style={{ flex: 1, padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

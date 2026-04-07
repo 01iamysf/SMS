@@ -912,7 +912,6 @@ const TeacherDashboard = () => {
                             </div>
                         </div>
 
-                        <ThemeToggle />
                         <NotificationDropdown />
 
                         {/* ← Functional Profile Dropdown (replaces static avatar) */}

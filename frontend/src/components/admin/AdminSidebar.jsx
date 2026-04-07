@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { LogOut, LayoutDashboard, Users, BookOpen, UserPlus, Settings, Activity, GraduationCap, X } from 'lucide-react';
+import ThemeToggle from '../shared/ThemeToggle';
 
 const AdminSidebar = ({ isOpen, setIsOpen }) => {
     const { logout, user } = useAuth();
@@ -28,9 +29,12 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
                         </h2>
                         <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>{user?.name}</p>
                     </div>
-                    <button className="sidebar-close-btn" onClick={() => setIsOpen(false)}>
-                        <X size={20} />
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <ThemeToggle />
+                        <button className="sidebar-close-btn" onClick={() => setIsOpen(false)}>
+                            <X size={20} />
+                        </button>
+                    </div>
                 </div>
 
             <nav style={{ flex: 1, padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

@@ -341,7 +341,6 @@ const ParentDashboard = () => {
                         </div>
                     </div>
                     <div className="dashboard-header-actions">
-                        <ThemeToggle />
                         <NotificationDropdown />
                         <div className="glass-panel" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <TrendingUp size={18} className="text-brand" />

@@ -609,7 +609,6 @@ const StudentDashboard = () => {
                             </div>
                         </div>
 
-                        <ThemeToggle />
                         <NotificationDropdown />
                         {/* Functional Profile Dropdown */}
                         <ProfileDropdown user={user} />

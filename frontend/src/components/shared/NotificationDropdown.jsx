@@ -125,7 +125,7 @@ const NotificationDropdown = () => {
     };
 
     return (
-        <div ref={dropdownRef} style={{ position: 'relative', isolation: 'isolate' }}>
+        <div ref={dropdownRef} style={{ position: 'relative', zIndex: 100 }}>
             {/* Bell Button */}
             <button
                 id="notification-bell-btn"
@@ -184,17 +184,17 @@ const NotificationDropdown = () => {
                             position: 'fixed',
                             right: '0.75rem',
                             left: '0.75rem',
-                            top: '5rem',
+                            top: '5.5rem',
                             width: 'auto',
                             maxWidth: '400px',
                             marginLeft: 'auto',
                             background: 'var(--bg-secondary)',
-                            zIndex: 9999,
+                            zIndex: 99999,
                             borderRadius: '0.75rem',
                             border: '1px solid var(--border-color)',
                             boxShadow: '0 12px 40px rgba(0,0,0,0.35)',
                             overflow: 'hidden',
-                            maxHeight: 'calc(100vh - 5.75rem)',
+                            maxHeight: 'calc(100vh - 6.25rem)',
                             display: 'flex',
                             flexDirection: 'column'
                         }}
@@ -221,42 +221,41 @@ const NotificationDropdown = () => {
                                     </span>
                                 )}
                             </div>
-                            {unreadCount > 0 && (
-                                <button
-                                    onClick={markAllAsRead}
-                                    style={{
-                                        background: 'none', border: 'none',
-                                        color: 'var(--brand-primary)', fontSize: '0.72rem',
-                                        cursor: 'pointer', fontWeight: '600', opacity: 0.8
-                                    }}
-                                    onMouseOver={e => e.currentTarget.style.opacity = 1}
-                                    onMouseOut={e => e.currentTarget.style.opacity = 0.8}
-                                >
-                                    Mark all read
-                                </button>
-                            )}
-                            {notifications.length > 0 && (
-                                <button
-                                    id="notification-clear-btn"
-                                    onClick={clearAll}
-                                    disabled={clearing}
-                                    style={{
-                                        background: 'rgba(239,68,68,0.1)',
-                                        border: '1px solid rgba(239,68,68,0.25)',
-                                        color: '#ef4444',
-                                        fontSize: '0.68rem', fontWeight: '700',
-                                        cursor: clearing ? 'not-allowed' : 'pointer',
-                                        borderRadius: '5px',
-                                        padding: '2px 8px',
-                                        opacity: clearing ? 0.6 : 1,
-                                        transition: 'all 0.15s'
-                                    }}
-                                    onMouseOver={e => { if (!clearing) e.currentTarget.style.background = 'rgba(239,68,68,0.2)'; }}
-                                    onMouseOut={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; }}
-                                >
-                                    {clearing ? 'Clearing…' : 'Clear All'}
-                                </button>
-                            )}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                {unreadCount > 0 && (
+                                    <button
+                                        onClick={markAllAsRead}
+                                        style={{
+                                            background: 'none', border: 'none',
+                                            color: 'var(--brand-primary)', fontSize: '0.72rem',
+                                            cursor: 'pointer', fontWeight: '600', opacity: 0.8
+                                        }}
+                                        onMouseOver={e => e.currentTarget.style.opacity = 1}
+                                        onMouseOut={e => e.currentTarget.style.opacity = 0.8}
+                                    >
+                                        Mark all read
+                                    </button>
+                                )}
+                                {notifications.length > 0 && (
+                                    <button
+                                        id="notification-clear-btn"
+                                        onClick={clearAll}
+                                        disabled={clearing}
+                                        style={{
+                                            background: 'rgba(239,68,68,0.1)',
+                                            border: '1px solid rgba(239,68,68,0.25)',
+                                            color: '#ef4444',
+                                            fontSize: '0.68rem', fontWeight: '700',
+                                            cursor: clearing ? 'not-allowed' : 'pointer',
+                                            borderRadius: '5px',
+                                            padding: '3px 10px',
+                                            opacity: clearing ? 0.5 : 1
+                                        }}
+                                    >
+                                        {clearing ? '...' : 'Clear all'}
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         {/* List */}
