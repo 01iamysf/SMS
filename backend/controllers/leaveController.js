@@ -19,6 +19,23 @@ export const applyLeave = async (req, res) => {
             reason
         });
         res.status(201).json({ message: 'Leave application submitted successfully', leave });
+
+        // Notify the class coordinator (if student applying and classId is set)
+        if (req.user.role === 'student' && req.user.classId) {
+            const coordinator = await User.findOne({
+                role: 'teacher',
+                classCoordinatorFor: req.user.classId
+            });
+
+            if (coordinator) {
+                await Notification.create({
+                    userId: coordinator._id,
+                    message: `📋 New leave request from ${req.user.name} (${new Date(startDate).toLocaleDateString()} – ${new Date(endDate).toLocaleDateString()}): "${reason.substring(0, 60)}${reason.length > 60 ? '…' : ''}"`,
+                    type: 'leave_request',
+                    link: '/teacher/leaves'
+                });
+            }
+        }
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -109,11 +126,11 @@ export const approveLeave = async (req, res) => {
                         },
                         {
                             studentId: student._id,
-                            teacherId: req.user._id, // Approved by coordinator
+                            teacherId: req.user._id,
                             classId: student.classId,
                             subjectId: enrollment.subject._id,
                             date: currentDate,
-                            time: '00:00:00', // Default for leave
+                            time: '00:00:00',
                             method: 'manual',
                             status: 'leave'
                         },
@@ -125,11 +142,12 @@ export const approveLeave = async (req, res) => {
 
         res.json({ message: 'Leave approved and attendance adjusted', leave });
 
-        // Create notification for student
+        // Notify student: approved
         await Notification.create({
             userId: leave.userId,
-            message: `Your leave application from ${new Date(leave.startDate).toLocaleDateString()} to ${new Date(leave.endDate).toLocaleDateString()} has been APPROVED.`,
-            type: 'leave_approved'
+            message: `✅ Your leave request (${new Date(leave.startDate).toLocaleDateString()} – ${new Date(leave.endDate).toLocaleDateString()}) has been APPROVED by your coordinator.`,
+            type: 'leave_approved',
+            link: '/student/leaves'
         });
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -151,11 +169,12 @@ export const rejectLeave = async (req, res) => {
         await leave.save();
         res.json({ message: 'Leave request rejected', leave });
 
-        // Create notification for student
+        // Notify student: rejected
         await Notification.create({
             userId: leave.userId,
-            message: `Your leave application from ${new Date(leave.startDate).toLocaleDateString()} to ${new Date(leave.endDate).toLocaleDateString()} was REJECTED.`,
-            type: 'leave_rejected'
+            message: `❌ Your leave request (${new Date(leave.startDate).toLocaleDateString()} – ${new Date(leave.endDate).toLocaleDateString()}) has been REJECTED by your coordinator.`,
+            type: 'leave_rejected',
+            link: '/student/leaves'
         });
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -197,15 +216,14 @@ export const revokeLeave = async (req, res) => {
 
         res.json({ message: 'Leave revoked and attendance records cleared', leave });
 
-        // Create notification for student
+        // Notify student: revoked
         await Notification.create({
             userId: leave.userId,
-            message: `Your previously approved leave from ${new Date(leave.startDate).toLocaleDateString()} to ${new Date(leave.endDate).toLocaleDateString()} has been REVOKED. Reason: ${leave.revocationReason}`,
-            type: 'leave_revoked'
+            message: `⚠️ Your approved leave (${new Date(leave.startDate).toLocaleDateString()} – ${new Date(leave.endDate).toLocaleDateString()}) has been REVOKED. Reason: ${leave.revocationReason}`,
+            type: 'leave_revoked',
+            link: '/student/leaves'
         });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
-
-

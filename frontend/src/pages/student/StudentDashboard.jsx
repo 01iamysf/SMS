@@ -2,26 +2,412 @@ import { Routes, Route } from 'react-router-dom';
 import StudentSidebar from '../../components/student/StudentSidebar';
 import { useAuth } from '../../context/AuthContext';
 
-
 import HistoryPage from './HistoryPage';
 import StreaksPage from './StreaksPage';
 import LeavePage from './LeavePage';
 import SubjectsPage from './SubjectsPage';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays } from 'date-fns';
-import { Activity, Calendar as CalendarIcon, ChevronLeft, ChevronRight, X, Shield, Check, Menu } from 'lucide-react';
+import { format } from 'date-fns';
+import { Activity, Calendar as CalendarIcon, Shield, Check, Menu, X, User, Mail, BookOpen, Building2, GraduationCap, Hash, ChevronDown } from 'lucide-react';
 import NotificationDropdown from '../../components/shared/NotificationDropdown';
 import ThemeToggle from '../../components/shared/ThemeToggle';
 import { motion, AnimatePresence } from 'framer-motion';
 
+/* ─────────────────────────────────────────
+   Attendance Percentage Ring (SVG)
+───────────────────────────────────────── */
+const AttendanceRing = ({ present, total }) => {
+    const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+    const radius = 60;
+    const stroke = 11;
+    const normalizedRadius = radius - stroke / 2;
+    const circumference = 2 * Math.PI * normalizedRadius;
+    const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+    // ≥90 Excellent | ≥75 Good | <75 Warning
+    const tier =
+        percentage >= 90 ? 'excellent' :
+        percentage >= 75 ? 'good' :
+        'warning';
+
+    const TIERS = {
+        excellent: {
+            color:  '#16a34a',
+            glow:   'rgba(22,163,74,0.25)',
+            bg:     'rgba(22,163,74,0.1)',
+            border: 'rgba(22,163,74,0.3)',
+            text:   '#16a34a',
+            label:  '✦ Excellent',
+        },
+        good: {
+            color:  '#f59e0b',
+            glow:   'rgba(245,158,11,0.22)',
+            bg:     'rgba(245,158,11,0.1)',
+            border: 'rgba(245,158,11,0.3)',
+            text:   '#d97706',
+            label:  '◈ Good',
+        },
+        warning: {
+            color:  '#ef4444',
+            glow:   'rgba(239,68,68,0.22)',
+            bg:     'rgba(239,68,68,0.1)',
+            border: 'rgba(239,68,68,0.3)',
+            text:   '#ef4444',
+            label:  '⚠ Warning',
+        }
+    };
+
+    const cfg = TIERS[tier];
+
+    // ── Smart insight calculation ──────────────────────────────
+    // Classes needed to reach a target %: ceil((target*total - present) / (1 - target))
+    const classesTo75 = total > 0 && percentage < 75
+        ? Math.ceil((0.75 * total - present) / 0.25)
+        : 0;
+    const classesTo90 = total > 0 && percentage < 90
+        ? Math.ceil((0.90 * total - present) / 0.10)
+        : 0;
+
+    const insights = (() => {
+        if (tier === 'excellent') return [
+            { icon: '🌟', text: 'You are in Excellent Standing!', sub: 'Top-tier performance. Stay consistent.' },
+            { icon: '🎯', text: `${present} of ${total} classes attended`, sub: `${100 - percentage}% buffer before dropping below 90%.` },
+        ];
+        if (tier === 'good') return [
+            { icon: '✅', text: 'You are in Good Standing', sub: 'Above the 75% minimum requirement.' },
+            { icon: '📈', text: `${classesTo90} more class${classesTo90 !== 1 ? 'es' : ''} to reach 90%`, sub: 'Aim higher for Excellent standing.' },
+        ];
+        // warning
+        return [
+            { icon: '⚠️', text: `Need ${classesTo75} more class${classesTo75 !== 1 ? 'es' : ''} to reach 75%`, sub: 'Attend all upcoming sessions urgently.' },
+            { icon: '📉', text: 'Attendance below safe threshold', sub: 'Risk of shortage — contact your coordinator.' },
+        ];
+    })();
+    // ──────────────────────────────────────────────────────────
+
+    return (
+        <div style={{
+            background: 'var(--bg-secondary)',
+            padding: '1.75rem 1.5rem',
+            borderRadius: '0.75rem',
+            border: `1px solid ${cfg.border}`,
+            boxShadow: `0 0 18px ${cfg.glow}`,
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '1rem',
+            transition: 'box-shadow 0.4s ease'
+        }}>
+            {/* Title */}
+            <h3 style={{
+                fontSize: '0.9rem', fontWeight: '700',
+                color: 'var(--text-secondary)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.07em',
+                margin: 0
+            }}>
+                Attendance Performance
+            </h3>
+
+            {/* SVG Ring */}
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg height={radius * 2} width={radius * 2} style={{ transform: 'rotate(-90deg)' }}>
+                    <circle stroke="var(--border-color)" fill="transparent" strokeWidth={stroke}
+                        r={normalizedRadius} cx={radius} cy={radius} />
+                    <motion.circle stroke={cfg.color} fill="transparent" strokeWidth={stroke + 4}
+                        strokeDasharray={`${circumference} ${circumference}`} strokeLinecap="round"
+                        r={normalizedRadius} cx={radius} cy={radius}
+                        initial={{ strokeDashoffset: circumference }}
+                        animate={{ strokeDashoffset }}
+                        transition={{ duration: 1.4, ease: 'easeOut' }}
+                        style={{ opacity: 0.18, filter: 'blur(4px)' }}
+                    />
+                    <motion.circle stroke={cfg.color} fill="transparent" strokeWidth={stroke}
+                        strokeDasharray={`${circumference} ${circumference}`} strokeLinecap="round"
+                        r={normalizedRadius} cx={radius} cy={radius}
+                        initial={{ strokeDashoffset: circumference }}
+                        animate={{ strokeDashoffset }}
+                        transition={{ duration: 1.4, ease: 'easeOut' }}
+                    />
+                </svg>
+                <div style={{
+                    position: 'absolute', display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', justifyContent: 'center', textAlign: 'center'
+                }}>
+                    <motion.span
+                        initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.6, duration: 0.4 }}
+                        style={{ fontSize: '1.8rem', fontWeight: '900', color: cfg.color, lineHeight: 1 }}
+                    >
+                        {percentage}%
+                    </motion.span>
+                    <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '3px', letterSpacing: '0.04em' }}>
+                        OVERALL
+                    </span>
+                </div>
+            </div>
+
+            {/* Status Badge */}
+            <motion.span
+                initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.3 }}
+                style={{
+                    padding: '0.35rem 1.1rem', borderRadius: '999px',
+                    fontSize: '0.8rem', fontWeight: '800',
+                    background: cfg.bg, color: cfg.text,
+                    border: `1px solid ${cfg.border}`,
+                    letterSpacing: '0.04em'
+                }}
+            >
+                {cfg.label}
+            </motion.span>
+
+            {/* ── Insight Sub-Card ─────────────────────────── */}
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.0, duration: 0.4 }}
+                style={{
+                    width: '100%',
+                    borderRadius: '0.6rem',
+                    border: `1px solid ${cfg.border}`,
+                    background: `linear-gradient(135deg, ${cfg.bg}, transparent)`,
+                    overflow: 'hidden'
+                }}
+            >
+                {/* Sub-card header strip */}
+                <div style={{
+                    padding: '0.4rem 0.75rem',
+                    borderBottom: `1px solid ${cfg.border}`,
+                    background: `${cfg.bg}`,
+                    display: 'flex', alignItems: 'center', gap: '0.4rem'
+                }}>
+                    <div style={{
+                        width: '6px', height: '6px', borderRadius: '50%',
+                        background: cfg.color,
+                        boxShadow: `0 0 6px ${cfg.color}`
+                    }} />
+                    <span style={{
+                        fontSize: '0.62rem', fontWeight: '800', color: cfg.text,
+                        textTransform: 'uppercase', letterSpacing: '0.08em'
+                    }}>
+                        Performance Insights
+                    </span>
+                </div>
+
+                {/* Insight rows */}
+                <div style={{ padding: '0.5rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {insights.map((ins, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 1.1 + i * 0.12, duration: 0.3 }}
+                            style={{
+                                display: 'flex', alignItems: 'flex-start', gap: '0.5rem',
+                                padding: '0.45rem 0.6rem',
+                                borderRadius: '0.45rem',
+                                background: 'rgba(0,0,0,0.12)',
+                                border: `1px solid ${cfg.border.replace('0.3', '0.15')}`
+                            }}
+                        >
+                            <span style={{ fontSize: '0.85rem', lineHeight: 1, marginTop: '1px', flexShrink: 0 }}>
+                                {ins.icon}
+                            </span>
+                            <div style={{ minWidth: 0 }}>
+                                <div style={{
+                                    fontSize: '0.75rem', fontWeight: '700',
+                                    color: cfg.text, lineHeight: '1.3'
+                                }}>
+                                    {ins.text}
+                                </div>
+                                <div style={{
+                                    fontSize: '0.65rem', color: 'var(--text-secondary)',
+                                    marginTop: '2px', lineHeight: '1.35'
+                                }}>
+                                    {ins.sub}
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            </motion.div>
+            {/* ─────────────────────────────────────────────── */}
+        </div>
+    );
+};
+
+
+/* ─────────────────────────────────────────
+   Profile Dropdown
+───────────────────────────────────────── */
+const ProfileDropdown = ({ user }) => {
+    const [open, setOpen] = useState(false);
+    const ref = useRef(null);
+
+    useEffect(() => {
+        const handleClick = (e) => {
+            if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+        };
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
+
+    const initial = user?.name?.charAt(0)?.toUpperCase() || 'S';
+
+    const InfoRow = ({ icon: Icon, label, value }) => {
+        if (!value) return null;
+        return (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', padding: '0.5rem 0', borderBottom: '1px solid var(--border-color)' }}>
+                <Icon size={14} style={{ color: 'var(--brand-primary)', marginTop: '2px', flexShrink: 0 }} />
+                <div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: '500', marginTop: '1px' }}>{value}</div>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <div ref={ref} style={{ position: 'relative' }}>
+            {/* Avatar Button */}
+            <button
+                onClick={() => setOpen(o => !o)}
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    padding: '2px',
+                    background: 'none',
+                    border: '2px solid var(--brand-primary)',
+                    borderRadius: '50px',
+                    cursor: 'pointer',
+                    transition: 'box-shadow 0.2s'
+                }}
+                onMouseOver={e => e.currentTarget.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.2)'}
+                onMouseOut={e => e.currentTarget.style.boxShadow = 'none'}
+            >
+                <div style={{
+                    width: '34px', height: '34px', borderRadius: '50%',
+                    background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))',
+                    color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: '800', fontSize: '0.9rem'
+                }}>
+                    {initial}
+                </div>
+                <ChevronDown
+                    size={13}
+                    style={{
+                        color: 'var(--text-secondary)',
+                        marginRight: '4px',
+                        transition: 'transform 0.2s',
+                        transform: open ? 'rotate(180deg)' : 'rotate(0deg)'
+                    }}
+                />
+            </button>
+
+            {/* Dropdown Card */}
+            <AnimatePresence>
+                {open && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                        transition={{ duration: 0.18 }}
+                        style={{
+                            position: 'absolute',
+                            top: 'calc(100% + 10px)',
+                            right: 0,
+                            width: '260px',
+                            background: 'var(--bg-secondary)',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: '0.75rem',
+                            boxShadow: 'var(--shadow-xl, 0 8px 32px rgba(0,0,0,0.25))',
+                            overflow: 'hidden',
+                            zIndex: 1100
+                        }}
+                    >
+                        {/* Header banner */}
+                        <div style={{
+                            background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))',
+                            padding: '1rem 1.2rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem'
+                        }}>
+                            <div style={{
+                                width: '44px', height: '44px', borderRadius: '50%',
+                                background: 'rgba(255,255,255,0.2)',
+                                color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontWeight: '900', fontSize: '1.1rem',
+                                border: '2px solid rgba(255,255,255,0.4)',
+                                flexShrink: 0
+                            }}>
+                                {initial}
+                            </div>
+                            <div style={{ overflow: 'hidden' }}>
+                                <div style={{ fontWeight: '700', color: 'white', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {user?.name || 'Student'}
+                                </div>
+                                <div style={{
+                                    fontSize: '0.68rem', color: 'rgba(255,255,255,0.75)',
+                                    fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em',
+                                    marginTop: '2px',
+                                    background: 'rgba(255,255,255,0.15)',
+                                    display: 'inline-block',
+                                    padding: '1px 6px',
+                                    borderRadius: '999px'
+                                }}>
+                                    {user?.role || 'Student'}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Info rows */}
+                        <div style={{ padding: '0.75rem 1.2rem 1rem' }}>
+                            <InfoRow icon={Mail} label="Email" value={user?.email} />
+                            <InfoRow
+                                icon={Building2}
+                                label="Department"
+                                value={user?.departmentId?.departmentName || user?.departmentId?.name}
+                            />
+                            <InfoRow
+                                icon={GraduationCap}
+                                label="Class"
+                                value={
+                                    (user?.classId?.className || user?.classId?.name)
+                                        ? `${user?.classId?.className || user?.classId?.name}${user?.section ? ' — Section ' + user.section : ''}`
+                                        : user?.section ? `Section ${user.section}` : null
+                                }
+                            />
+                            <InfoRow icon={Hash} label="Roll Number" value={user?.rollNumber} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', paddingTop: '0.5rem' }}>
+                                <BookOpen size={14} style={{ color: 'var(--brand-primary)', flexShrink: 0 }} />
+                                <div>
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Streak</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: '500', marginTop: '1px' }}>
+                                        🔥 {user?.streakCount || 0} day{user?.streakCount !== 1 ? 's' : ''} current &nbsp;·&nbsp; 🏆 {user?.bestStreak || 0} best
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
+/* ─────────────────────────────────────────
+   Student Overview (Dashboard main content)
+───────────────────────────────────────── */
 const StudentOverview = () => {
     const { user } = useAuth();
     const [stats, setStats] = useState(null);
     const [subjects, setSubjects] = useState([]);
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [currentMonth, setCurrentMonth] = useState(new Date());
 
     const canView = user?.permissions?.includes('viewAttendance');
 
@@ -41,164 +427,29 @@ const StudentOverview = () => {
         fetchDashboardData();
     }, [canView]);
 
-    const getDisplayStats = () => {
-        if (!stats) return { totalClasses: 0, totalPresent: 0, totalAbsent: 0, history: [] };
-        if (!selectedDate) return stats;
-
-        const historyOnDate = stats.history?.filter(h => isSameDay(new Date(h.date), selectedDate)) || [];
-        return {
-            totalClasses: historyOnDate.length > 0 ? 1 : 0,
-            totalPresent: historyOnDate.filter(h => h.status === 'present').length,
-            totalAbsent: historyOnDate.filter(h => h.status === 'absent').length,
-            history: historyOnDate
-        };
-    };
-
-    const renderCalendar = () => {
-        if (!canView) return null;
-        const monthStart = startOfMonth(currentMonth);
-        const monthEnd = endOfMonth(monthStart);
-        const startDate = startOfWeek(monthStart);
-        const endDate = endOfWeek(monthEnd);
-
-        const dateFormat = "d";
-        const rows = [];
-        let days = [];
-        let day = startDate;
-        let formattedDate = "";
-
-        while (day <= endDate) {
-            for (let i = 0; i < 7; i++) {
-                formattedDate = format(day, dateFormat);
-                const cloneDay = day;
-                const isSelected = selectedDate && isSameDay(day, selectedDate);
-                const isCurrMonth = isSameMonth(day, monthStart);
-
-                const recordsOnDay = stats?.history?.filter(h => isSameDay(new Date(h.date), cloneDay)) || [];
-                const hasPresent = recordsOnDay.some(h => h.status === 'present');
-                const hasAbsent = recordsOnDay.some(h => h.status === 'absent');
-
-                days.push(
-                    <div
-                        key={day}
-                        onClick={() => setSelectedDate(isSelected ? null : cloneDay)}
-                        style={{
-                            flex: 1, height: '40px', display: 'flex', flexDirection: 'column',
-                            alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-                            borderRadius: '0.5rem',
-                            background: isSelected ? 'var(--brand-primary)' : 'transparent',
-                            color: isSelected ? 'white' : (isCurrMonth ? 'var(--text-primary)' : 'var(--text-light)'),
-                            opacity: isCurrMonth ? 1 : 0.4,
-                            position: 'relative',
-                            transition: 'all 0.2s',
-                            border: '1px solid transparent'
-                        }}
-                        onMouseOver={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = 'var(--bg-primary)'; }}
-                        onMouseOut={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'; }}
-                    >
-                        <span style={{ fontSize: '0.875rem', zIndex: 1, fontWeight: isSelected ? 'bold' : 'normal' }}>{formattedDate}</span>
-                        {!isSelected && (hasPresent || hasAbsent) && (
-                            <div style={{ display: 'flex', gap: '2px', position: 'absolute', bottom: '4px' }}>
-                                {hasPresent && <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#16a34a' }} />}
-                                {hasAbsent && <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#dc2626' }} />}
-                            </div>
-                        )}
-                    </div>
-                );
-                day = addDays(day, 1);
-            }
-            rows.push(<div key={day} style={{ display: 'flex', marginTop: '4px' }}>{days}</div>);
-            days = [];
-        }
-
-        const weekDays = [];
-        let weekStartDate = startOfWeek(currentMonth);
-        for (let i = 0; i < 7; i++) {
-            weekDays.push(
-                <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-                    {format(addDays(weekStartDate, i), 'eeeee')}
-                </div>
-            );
-        }
-
-        return (
-            <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)', height: '100%' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-                        <ChevronLeft size={20} />
-                    </button>
-                    <span style={{ fontWeight: 'bold', color: 'var(--text-primary)', fontSize: '1rem' }}>{format(currentMonth, 'MMMM yyyy')}</span>
-                    <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-                        <ChevronRight size={20} />
-                    </button>
-                </div>
-                <div style={{ display: 'flex', marginBottom: '1rem' }}>{weekDays}</div>
-                <div>{rows}</div>
-            </div>
-        );
-    };
-
-    const displayStats = getDisplayStats();
-
     return (
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {/* Dashboard Header & Animated Button */}
+            {/* Dashboard Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>Student Overview</h2>
-                <motion.button
-                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(236, 72, 153, 0.4)" }}
-                    whileTap={{ scale: 0.95 }}
-                    style={{
-                        position: 'relative',
-                        padding: '0.75rem 1.5rem',
-                        background: 'linear-gradient(135deg, var(--brand-primary), #ec4899)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '12px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        overflow: 'hidden',
-                        boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)'
-                    }}
-                >
-                    <motion.div
-                        animate={{ x: ['-200%', '300%'] }}
-                        transition={{ repeat: Infinity, duration: 2.5, ease: "linear" }}
-                        style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '40%',
-                            height: '100%',
-                            background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent)',
-                            transform: 'skewX(-20deg)',
-                            zIndex: 1
-                        }}
-                    />
-                    <Activity size={18} style={{ zIndex: 2, position: 'relative' }} />
-                    <span style={{ zIndex: 2, position: 'relative' }}>Generate Report</span>
-                </motion.button>
             </div>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', alignItems: 'stretch' }}>
                 {/* LEFT: Stats */}
-                <div style={{ flex: '1 1 0%', minWidth: '300px' }}>
-                    <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: '0.5rem' }}>
+                <div style={{ flex: '1 1 280px', minWidth: 0 }}>
+                    <div style={{
+                        background: 'var(--bg-secondary)',
+                        padding: '1.5rem',
+                        borderRadius: '0.75rem',
+                        border: '1px solid rgba(99,102,241,0.3)',
+                        boxShadow: '0 0 18px rgba(99,102,241,0.15)',
+                        height: '100%',
+                        boxSizing: 'border-box'
+                    }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                             <h3 style={{ fontSize: '1.1rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)' }}>
                                 <Activity size={18} /> Attendance Stats
                             </h3>
-                            {selectedDate && (
-                                <button
-                                    onClick={() => setSelectedDate(null)}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '999px', padding: '0.25rem 0.5rem', fontSize: '0.75rem', cursor: 'pointer', color: 'var(--text-secondary)' }}
-                                >
-                                    <X size={12} /> Clear Filter
-                                </button>
-                            )}
                         </div>
 
                         {!canView ? (
@@ -208,43 +459,35 @@ const StudentOverview = () => {
                             </div>
                         ) : (
                             <>
-                                {selectedDate && (
-                                    <div style={{ marginBottom: '1.5rem', padding: '0.75rem', background: 'var(--brand-primary)', color: 'white', borderRadius: '0.5rem', textAlign: 'center', fontWeight: '500', fontSize: '0.875rem' }}>
-                                        Showing stats for: {format(selectedDate, 'MMMM d, yyyy')}
-                                    </div>
-                                )}
-
                                 {/* Streak Highlight */}
-                                {!selectedDate && (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-                                        <div className="glass-panel" style={{ padding: '1.25rem', background: 'linear-gradient(135deg, #fff 0%, #fff7ed 100%)', border: '1px solid #ffedd5', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                            <div style={{ fontSize: '2rem' }}>🔥</div>
-                                            <div style={{ textAlign: 'left' }}>
-                                                <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#ea580c' }}>{stats?.streakCount || 0}</div>
-                                                <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#9a3412', textTransform: 'uppercase' }}>Current Streak</div>
-                                            </div>
-                                        </div>
-                                        <div className="glass-panel" style={{ padding: '1.25rem', background: 'linear-gradient(135deg, #fff 0%, #f0fdf4 100%)', border: '1px solid #dcfce7', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                            <div style={{ fontSize: '2rem' }}>🏆</div>
-                                            <div style={{ textAlign: 'left' }}>
-                                                <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#16a34a' }}>{stats?.bestStreak || 0}</div>
-                                                <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#166534', textTransform: 'uppercase' }}>Best Streak</div>
-                                            </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                                    <div className="glass-panel" style={{ padding: '1.25rem', background: 'linear-gradient(135deg, #fff 0%, #fff7ed 100%)', border: '1px solid #ffedd5', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <div style={{ fontSize: '2rem' }}>🔥</div>
+                                        <div style={{ textAlign: 'left' }}>
+                                            <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#ea580c' }}>{stats?.streakCount || 0}</div>
+                                            <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#9a3412', textTransform: 'uppercase' }}>Current Streak</div>
                                         </div>
                                     </div>
-                                )}
+                                    <div className="glass-panel" style={{ padding: '1.25rem', background: 'linear-gradient(135deg, #fff 0%, #f0fdf4 100%)', border: '1px solid #dcfce7', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <div style={{ fontSize: '2rem' }}>🏆</div>
+                                        <div style={{ textAlign: 'left' }}>
+                                            <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#16a34a' }}>{stats?.bestStreak || 0}</div>
+                                            <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#166534', textTransform: 'uppercase' }}>Best Streak</div>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', textAlign: 'center' }}>
                                     <div style={{ background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)' }}>
-                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--brand-primary)' }}>{displayStats.totalClasses}</div>
+                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--brand-primary)' }}>{stats?.totalClasses ?? 0}</div>
                                         <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Total</div>
                                     </div>
                                     <div style={{ background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
-                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#16a34a' }}>{displayStats.totalPresent}</div>
+                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#16a34a' }}>{stats?.totalPresent ?? 0}</div>
                                         <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Present</div>
                                     </div>
                                     <div style={{ background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#dc2626' }}>{displayStats.totalAbsent}</div>
+                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#dc2626' }}>{stats?.totalAbsent ?? 0}</div>
                                         <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Absent</div>
                                     </div>
                                 </div>
@@ -253,24 +496,29 @@ const StudentOverview = () => {
                     </div>
                 </div>
 
-                {/* RIGHT: Calendar Filter */}
-                <div style={{ width: '100%', maxWidth: '350px', flexShrink: 0 }}>
-                    {canView && renderCalendar()}
+                {/* RIGHT: Attendance Performance Ring */}
+                <div style={{ flex: '1 1 280px', minWidth: 0 }}>
+                    {canView && (
+                        <AttendanceRing
+                            present={stats?.totalPresent ?? 0}
+                            total={stats?.totalClasses ?? 0}
+                        />
+                    )}
                 </div>
             </div>
 
             {/* Today's Schedule */}
             <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: '0.5rem' }}>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <CalendarIcon size={18} /> {selectedDate ? `Schedule for ${format(selectedDate, 'MMM d')}` : "Today's Schedule"}
+                    <CalendarIcon size={18} /> Today's Schedule
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
                     {(subjects.filter(s => {
-                        const dayName = format(selectedDate || new Date(), 'EEEE');
+                        const dayName = format(new Date(), 'EEEE');
                         return s.dayOfWeek === dayName;
                     })).length > 0 ? (
                         subjects.filter(s => {
-                            const dayName = format(selectedDate || new Date(), 'EEEE');
+                            const dayName = format(new Date(), 'EEEE');
                             return s.dayOfWeek === dayName;
                         }).sort((a, b) => {
                             const t = (s) => {
@@ -291,76 +539,26 @@ const StudentOverview = () => {
                         ))
                     ) : (
                         <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '1.5rem', background: 'var(--bg-primary)', borderRadius: '0.5rem', border: '1px dashed var(--border-color)', color: 'var(--text-light)', fontSize: '0.875rem' }}>
-                            No scheduled classes for this day.
+                            No scheduled classes for today.
                         </div>
                     )}
                 </div>
             </div>
-
-            {/* BOTTOM: Attendance Details Table */}
-            {canView && (
-                <div style={{ width: '100%', background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', color: 'var(--text-primary)' }}>
-                        Attendance Details {selectedDate && `for ${format(selectedDate, 'MMMM d, yyyy')}`}
-                    </h3>
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                            <thead>
-                                <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-                                    <th style={{ padding: '0.75rem 1rem', fontWeight: '600' }}>Date</th>
-                                    <th style={{ padding: '0.75rem 1rem', fontWeight: '600' }}>Subject</th>
-                                    <th style={{ padding: '0.75rem 1rem', fontWeight: '600' }}>Time</th>
-                                    <th style={{ padding: '0.75rem 1rem', fontWeight: '600' }}>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {displayStats.history?.length > 0 ? displayStats.history.map((record, index) => (
-                                    <tr key={record._id || index} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                                        <td style={{ padding: '0.75rem 1rem', fontSize: '0.875rem', color: 'var(--text-primary)' }}>
-                                            {format(new Date(record.date), 'MMM d, yyyy')}
-                                        </td>
-                                        <td style={{ padding: '0.75rem 1rem', fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-primary)' }}>
-                                            {record.subjectId?.subjectName || 'Unknown Subject'}
-                                        </td>
-                                        <td style={{ padding: '0.75rem 1rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                                            {record.time || 'N/A'}
-                                        </td>
-                                        <td style={{ padding: '0.75rem 1rem' }}>
-                                            <span style={{
-                                                padding: '0.25rem 0.75rem',
-                                                borderRadius: '1rem',
-                                                fontSize: '0.75rem',
-                                                fontWeight: '600',
-                                                background: record.status === 'present' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                                                color: record.status === 'present' ? '#10b981' : '#ef4444'
-                                            }}>
-                                                {record.status === 'present' ? 'Present' : 'Absent'}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                )) : (
-                                    <tr>
-                                        <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-light)', fontSize: '0.875rem' }}>
-                                            No attendance records found{selectedDate && ' for this date'}.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
+
+/* ─────────────────────────────────────────
+   Root Dashboard Layout
+───────────────────────────────────────── */
 const StudentDashboard = () => {
     const { user } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
     return (
         <div className="app-container" style={{ background: 'var(--bg-primary)' }}>
             <StudentSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
             <main className="dashboard-main">
-
                 <header className="glass-panel dashboard-header">
                     <div className="flex-row-mobile">
                         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -371,6 +569,7 @@ const StudentDashboard = () => {
                         </div>
                     </div>
                     <div className="dashboard-header-actions">
+                        {/* Account Level badge */}
                         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }} className="group">
                             <div style={{
                                 padding: '0.5rem',
@@ -389,9 +588,10 @@ const StudentDashboard = () => {
                             </div>
 
                             <div className="permissions-tooltip" style={{
-                                position: 'absolute', top: '100%', right: 0, marginTop: '0.5rem', width: '240px',
+                                position: 'fixed', top: '5rem', right: '0.75rem',
+                                width: 'min(240px, calc(100vw - 1.5rem))',
                                 background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '1rem',
-                                boxShadow: 'var(--shadow-xl)', padding: '1rem', zIndex: 1000,
+                                boxShadow: 'var(--shadow-xl)', padding: '1rem', zIndex: 9999,
                                 visibility: 'hidden', opacity: 0, transition: 'all 0.2s'
                             }}>
                                 <h4 style={{ fontSize: '0.85rem', fontWeight: '800', marginBottom: '0.75rem', color: 'var(--text-primary)' }}>Student Status</h4>
@@ -411,16 +611,14 @@ const StudentDashboard = () => {
 
                         <ThemeToggle />
                         <NotificationDropdown />
-                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800' }}>
-                            {user?.name?.charAt(0) || 'S'}
-                        </div>
+                        {/* Functional Profile Dropdown */}
+                        <ProfileDropdown user={user} />
                     </div>
                 </header>
 
                 <div style={{ flex: 1 }}>
                     <Routes>
                         <Route path="/" element={<StudentOverview />} />
-
                         <Route path="/history" element={user?.permissions?.includes('viewAttendance') ? <HistoryPage /> : <StudentOverview />} />
                         <Route path="/streaks" element={<StreaksPage />} />
                         <Route path="/leaves" element={<LeavePage />} />

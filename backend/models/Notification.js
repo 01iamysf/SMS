@@ -14,6 +14,10 @@ const notificationSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    link: {
+        type: String,
+        default: null,   // e.g. '/teacher/leaves' or '/student/leaves'
+    },
     read: {
         type: Boolean,
         default: false,
