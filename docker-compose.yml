@@ -1,7 +1,5 @@
 version: '3.8'
-
 services:
-
   mongo:
     image: mongo:7
     container_name: mongo
@@ -33,6 +31,18 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin123
+    depends_on:
+      - mongo
 
 volumes:
   mongo_data:
