@@ -34,14 +34,28 @@ export const sendNotificationToClass = async (req, res) => {
         const { message, type } = req.body;
         const students = await User.find({ role: 'student', classId: classId });
 
-        const notifications = students.map(student => ({
-            userId: student._id,
-            message,
-            type: type || 'info'
-        }));
+        const notifications = [];
+        for (const student of students) {
+            // To Student
+            notifications.push({
+                userId: student._id,
+                message,
+                type: type || 'info'
+            });
+
+            // To Parent
+            if (student.parentId) {
+                notifications.push({
+                    userId: student.parentId,
+                    message: `📢 Notice for ${student.name}: ${message}`,
+                    type: type || 'info',
+                    link: '/parent'
+                });
+            }
+        }
 
         await Notification.insertMany(notifications);
-        res.status(201).json({ message: 'Notifications sent to class' });
+        res.status(201).json({ message: 'Notifications sent to class and parents' });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

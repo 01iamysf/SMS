@@ -1,17 +1,23 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import sendEmail from '../services/emailService.js';
 import SystemSetting from '../models/SystemSetting.js';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const test = async () => {
     try {
-        console.log('--- Manual Test for Md Yunus ---');
-        await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/attendance_system');
+        console.log('--- Manual Test for Student-1 ---');
+        // Override the docker MONGO_URI from .env for local testing
+        const mongoUri = process.env.MONGO_URI ? process.env.MONGO_URI.replace('mongo:', '127.0.0.1:') : 'mongodb://127.0.0.1:27017/attendance_system';
+        await mongoose.connect(mongoUri);
 
         const testData = {
-            studentName: 'Md Yunus',
+            studentName: 'Student-1',
             attendancePercentage: '68%',
             parentEmail: '01mdyusuf2004@gmail.com',
             course: 'BCA',
@@ -86,8 +92,8 @@ const test = async () => {
         console.log('Attempting to send email...');
         await sendEmail({
             email: testData.parentEmail,
-            subject: '🚨 Urgent: Low Attendance Alert – Md Yunus',
-            message: 'Low Attendance Alert for Md Yunus',
+            subject: '🚨 Urgent: Low Attendance Alert – Student-1',
+            message: 'Low Attendance Alert for Student-1',
             html,
             from: universityEmail ? `University Admin <${universityEmail}>` : undefined
         });

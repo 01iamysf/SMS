@@ -1,5 +1,5 @@
 import express from 'express';
-import { getStudentAttendance, getStudentSummary, getStudentLeaves } from '../controllers/parentController.js';
+import { getStudentAttendance, getStudentSummary, getStudentLeaves, getStudentAcademic } from '../controllers/parentController.js';
 import { protect, authorizeRoles } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -10,5 +10,6 @@ router.use(authorizeRoles('parent'));
 router.get('/student-attendance', getStudentAttendance);
 router.get('/student-summary', getStudentSummary);
 router.get('/student-leaves', getStudentLeaves);
+router.get('/student-academic', getStudentAcademic);
 
 export default router;

@@ -14,9 +14,7 @@ const ALL_PERMISSIONS = [
     { id: 'applyLeave', label: 'Apply Leave', category: 'General' },
     { id: 'viewReports', label: 'View Reports', category: 'General' },
     { id: 'manageStudents', label: 'Manage Students', category: 'Management' },
-    { id: 'manageSystem', label: 'Manage System', category: 'Management' },
-    { id: 'scanQR', label: 'Scan QR', category: 'General' },
-    { id: 'generateQR', label: 'Generate QR', category: 'General' }
+    { id: 'manageSystem', label: 'Manage System', category: 'Management' }
 ];
 
 const Permissions = () => {

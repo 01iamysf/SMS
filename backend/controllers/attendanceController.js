@@ -4,6 +4,7 @@ import SubjectAllocation from '../models/SubjectAllocation.js';
 import { isCurrentTimeInSlot } from '../utils/timeUtils.js';
 import sendEmail from '../services/emailService.js';
 import SystemSetting from '../models/SystemSetting.js';
+import Notification from '../models/Notification.js';
 
 /**
  * @desc    Mark manual attendance for a student
@@ -59,6 +60,17 @@ export const markManualAttendance = async (req, res) => {
             const student = await User.findById(studentId);
             student.streakCount = 0;
             await student.save();
+
+            // Notify parent if absent or on leave
+            if (student.parentId && (status === 'absent' || status === 'leave')) {
+                const statusLabel = status === 'absent' ? 'ABSENT 🔴' : 'on LEAVE 📋';
+                await Notification.create({
+                    userId: student.parentId,
+                    message: `⚠️ Attendance Alert: ${student.name} was marked ${statusLabel} today.`,
+                    type: 'info',
+                    link: '/parent/history'
+                });
+            }
         }
 
         res.status(201).json({ message: 'Manual attendance marked', attendance });
@@ -158,6 +170,17 @@ export const bulkMarkManualAttendance = async (req, res) => {
                     student.streakCount = 0;
                 }
                 await student.save();
+
+                // Notify parent if absent or on leave
+                if (student.parentId && (status === 'absent' || status === 'leave')) {
+                    const statusLabel = status === 'absent' ? 'ABSENT 🔴' : 'on LEAVE 📋';
+                    await Notification.create({
+                        userId: student.parentId,
+                        message: `⚠️ Attendance Alert: ${student.name} was marked ${statusLabel} today.`,
+                        type: 'info',
+                        link: '/parent/history'
+                    });
+                }
             }
             results.push(attendance);
         }

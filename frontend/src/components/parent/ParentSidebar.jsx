@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, LineChart, FileText, ShieldCheck, X } from 'lucide-react';
+import { LogOut, LineChart, FileText, ShieldCheck, BookOpen, X } from 'lucide-react';
 import ThemeToggle from '../shared/ThemeToggle';
 
 const ParentSidebar = ({ isOpen, setIsOpen }) => {
@@ -11,6 +11,7 @@ const ParentSidebar = ({ isOpen, setIsOpen }) => {
         { name: 'Summary & Analytics', path: '/parent', icon: <LineChart size={20} /> },
         { name: 'Detailed History', path: '/parent/history', icon: <FileText size={20} /> },
         { name: 'Leave Applications', path: '/parent/leaves', icon: <ShieldCheck size={20} /> },
+        { name: 'Academic Details', path: '/parent/academic', icon: <BookOpen size={20} /> },
     ];
 
     return (

@@ -149,6 +149,16 @@ export const approveLeave = async (req, res) => {
             type: 'leave_approved',
             link: '/student/leaves'
         });
+
+        // Notify parent: approved
+        if (student && student.parentId) {
+            await Notification.create({
+                userId: student.parentId,
+                message: `✅ Leave request for ${student.name} (${new Date(leave.startDate).toLocaleDateString()} – ${new Date(leave.endDate).toLocaleDateString()}) has been APPROVED.`,
+                type: 'leave_approved',
+                link: '/parent/leaves'
+            });
+        }
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -176,6 +186,17 @@ export const rejectLeave = async (req, res) => {
             type: 'leave_rejected',
             link: '/student/leaves'
         });
+
+        // Notify parent: rejected
+        const student = await User.findById(leave.userId);
+        if (student && student.parentId) {
+            await Notification.create({
+                userId: student.parentId,
+                message: `❌ Leave request for ${student.name} (${new Date(leave.startDate).toLocaleDateString()} – ${new Date(leave.endDate).toLocaleDateString()}) has been REJECTED.`,
+                type: 'leave_rejected',
+                link: '/parent/leaves'
+            });
+        }
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -223,6 +244,17 @@ export const revokeLeave = async (req, res) => {
             type: 'leave_revoked',
             link: '/student/leaves'
         });
+
+        // Notify parent: revoked
+        const student = await User.findById(leave.userId);
+        if (student && student.parentId) {
+            await Notification.create({
+                userId: student.parentId,
+                message: `⚠️ Approved leave for ${student.name} (${new Date(leave.startDate).toLocaleDateString()} – ${new Date(leave.endDate).toLocaleDateString()}) has been REVOKED.`,
+                type: 'leave_revoked',
+                link: '/parent/leaves'
+            });
+        }
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

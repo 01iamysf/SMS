@@ -15,9 +15,7 @@ const ALL_SYSTEM_PERMISSIONS = [
     { id: 'applyLeave', label: 'Apply Leave', desc: 'Can request leave of absence' },
     { id: 'viewReports', label: 'View Reports', desc: 'Access to high-level analytics' },
     { id: 'manageStudents', label: 'Manage Students', desc: 'Add or modify student records' },
-    { id: 'manageSystem', label: 'Manage System', desc: 'Access to system-wide configurations' },
-    { id: 'scanQR', label: 'Scan QR', desc: 'Can sign in using QR code' },
-    { id: 'generateQR', label: 'Generate QR', desc: 'Can create QR codes for sessions' }
+    { id: 'manageSystem', label: 'Manage System', desc: 'Access to system-wide configurations' }
 ];
 
 /**

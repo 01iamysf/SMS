@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import Attendance from '../models/Attendance.js';
 import LeaveRequest from '../models/LeaveRequest.js';
+import SubjectAllocation from '../models/SubjectAllocation.js';
 
 export const getStudentAttendance = async (req, res) => {
     try {
@@ -80,6 +81,70 @@ export const getStudentLeaves = async (req, res) => {
             .sort({ createdAt: -1 });
 
         res.json(leaves);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+export const getStudentAcademic = async (req, res) => {
+    try {
+        const parentId = req.user._id;
+        const parentEmail = req.user.email;
+        const students = await User.find({
+            $or: [{ parentId }, { parentEmail }],
+            role: 'student'
+        }).populate('departmentId', 'departmentName')
+          .populate('classId', 'className section year');
+
+        if (!students || students.length === 0) {
+            return res.status(404).json({ message: 'No students found for this parent' });
+        }
+
+        const academicData = [];
+        for (const student of students) {
+            // Find class coordinator
+            let coordinator = null;
+            if (student.classId) {
+                coordinator = await User.findOne({
+                    role: 'teacher',
+                    classCoordinatorFor: student.classId._id
+                }).select('name email avatar');
+            }
+
+            // Find subject allocations for this class
+            const allocations = await SubjectAllocation.find({ classId: student.classId?._id })
+                .populate('teacherId', 'name email avatar')
+                .populate('subjectId', 'subjectName subjectCode');
+
+            academicData.push({
+                studentId: student._id,
+                name: student.name,
+                rollNumber: student.rollNumber,
+                department: student.departmentId?.departmentName || 'N/A',
+                classInfo: student.classId ? {
+                    name: student.classId.className,
+                    section: student.classId.section,
+                    year: student.classId.year
+                } : null,
+                coordinator,
+                subjects: allocations.map(a => ({
+                    _id: a._id,
+                    name: a.subjectId?.subjectName || 'Unknown Subject',
+                    code: a.subjectId?.subjectCode,
+                    teacher: a.teacherId ? {
+                        name: a.teacherId.name,
+                        email: a.teacherId.email,
+                        avatar: a.teacherId.avatar
+                    } : null,
+                    schedule: {
+                        day: a.dayOfWeek,
+                        start: a.startTime,
+                        end: a.endTime
+                    }
+                }))
+            });
+        }
+
+        res.json(academicData);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

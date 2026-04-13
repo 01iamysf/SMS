@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Calendar, Award, AlertCircle, ChevronRight, Activity, TrendingUp, History, Bell, ShieldCheck, Menu } from 'lucide-react';
+import { Users, Calendar, Award, AlertCircle, ChevronRight, Activity, TrendingUp, History, Bell, ShieldCheck, Menu, BookOpen, GraduationCap, Hash, UserCheck } from 'lucide-react';
 import ParentSidebar from '../../components/parent/ParentSidebar';
 import NotificationDropdown from '../../components/shared/NotificationDropdown';
 import ThemeToggle from '../../components/shared/ThemeToggle';
@@ -301,28 +301,164 @@ const LeavesView = ({ childrenData, selectedChildId }) => {
     );
 };
 
-const ParentDashboard = () => {
-    const [childrenData, setChildrenData] = useState([]);
-    const [selectedChildId, setSelectedChildId] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+const AcademicView = ({ childrenData, selectedChildId }) => {
+    const [academicData, setAcademicData] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const fetchChildrenData = async () => {
+        const fetchAcademic = async () => {
+            setLoading(true);
             try {
-                const { data } = await axios.get('/parent/student-summary');
-                setChildrenData(data);
-                if (data.length > 0) {
-                    setSelectedChildId(data[0].studentId);
-                }
+                const { data } = await axios.get('/parent/student-academic');
+                setAcademicData(data);
             } catch (err) {
                 console.error(err);
             } finally {
                 setLoading(false);
             }
         };
+        fetchAcademic();
+    }, []);
+
+    const selectedChild = academicData.find(c => c.studentId === selectedChildId);
+
+    if (loading) return <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Loading academic details...</div>;
+    if (!selectedChild) return (
+        <div style={{ padding: '4rem 2rem', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '1rem', border: '1px dashed var(--border-color)' }}>
+            <BookOpen size={48} style={{ margin: '0 auto 1rem', color: 'var(--text-light)' }} />
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>Select a child to view academic details</h3>
+        </div>
+    );
+
+    return (
+        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            {/* Child Profile Card */}
+            <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="glass-panel"
+                style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem', position: 'relative', overflow: 'hidden' }}
+            >
+                <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', background: 'var(--brand-primary)', opacity: 0.03, borderRadius: '0 0 0 100%' }} />
+                
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2.5rem', alignItems: 'center' }}>
+                    <div style={{
+                        width: '80px', height: '80px', borderRadius: '1.5rem',
+                        background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))',
+                        color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '2rem', fontWeight: 'bold', boxShadow: '0 8px 16px rgba(99,102,241,0.2)'
+                    }}>
+                        {selectedChild.name.charAt(0)}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>{selectedChild.name}</h2>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', color: 'var(--text-secondary)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Hash size={16} /> <strong>Roll:</strong> {selectedChild.rollNumber || 'N/A'}</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><GraduationCap size={16} /> <strong>Class:</strong> {selectedChild.classInfo ? `${selectedChild.classInfo.name} - ${selectedChild.classInfo.section}` : 'N/A'}</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><BookOpen size={16} /> <strong>Dept:</strong> {selectedChild.department}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Coordinator Info */}
+                {selectedChild.coordinator && (
+                    <div style={{ padding: '1.5rem', background: 'var(--bg-secondary)', borderRadius: '1rem', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                        <div style={{ padding: '0.75rem', background: 'var(--brand-primary)', borderRadius: '0.75rem', color: 'white' }}>
+                            <UserCheck size={24} />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Class Coordinator</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)' }}>{selectedChild.coordinator.name}</div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{selectedChild.coordinator.email}</div>
+                        </div>
+                    </div>
+                )}
+            </motion.div>
+
+            {/* Subjects Grid */}
+            <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <BookOpen size={24} className="text-brand" /> Enrolled Subjects
+                </h3>
+                {selectedChild.subjects.length > 0 ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                        {selectedChild.subjects.map((sub, i) => (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.05 }}
+                                key={sub._id}
+                                className="glass-panel"
+                                style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', borderLeft: '4px solid var(--brand-primary)' }}
+                            >
+                                <div>
+                                    <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--brand-primary)', textTransform: 'uppercase' }}>{sub.code || 'CORE'}</div>
+                                    <h4 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)' }}>{sub.name}</h4>
+                                </div>
+                                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginBottom: '0.4rem' }}>Instructor</div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand-primary)', fontWeight: 'bold', fontSize: '0.8rem', border: '1px solid var(--border-color)' }}>
+                                            {sub.teacher?.name.charAt(0) || '?'}
+                                        </div>
+                                        <div style={{ fontWeight: '600', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{sub.teacher?.name || 'Unassigned'}</div>
+                                    </div>
+                                </div>
+                                {sub.schedule && sub.schedule.day && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-light)', fontSize: '0.75rem' }}>
+                                        <Calendar size={14} />
+                                        <span>{sub.schedule.day}: {sub.schedule.start} - {sub.schedule.end}</span>
+                                    </div>
+                                )}
+                            </motion.div>
+                        ))}
+                    </div>
+                ) : (
+                    <div style={{ padding: '3rem', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '1rem', color: 'var(--text-secondary)' }}>
+                        No subjects allocated for this class.
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const ParentDashboard = () => {
+    const [childrenData, setChildrenData] = useState([]);
+    const [selectedChildId, setSelectedChildId] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [syncing, setSyncing] = useState(false);
+    const [lastSynced, setLastSynced] = useState(new Date());
+
+    const fetchChildrenData = async (isManual = false) => {
+        if (isManual) setSyncing(true);
+        try {
+            const { data } = await axios.get('/parent/student-summary');
+            setChildrenData(data);
+            if (data.length > 0 && !selectedChildId) {
+                setSelectedChildId(data[0].studentId);
+            }
+            setLastSynced(new Date());
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+            if (isManual) {
+                // Keep the "Syncing" state for at least 800ms for visual satisfaction
+                setTimeout(() => setSyncing(false), 800);
+            }
+        }
+    };
+
+    useEffect(() => {
         fetchChildrenData();
     }, []);
+
+    const handleSync = () => {
+        if (syncing) return;
+        fetchChildrenData(true);
+    };
 
     return (
         <div className="app-container" style={{ background: 'var(--bg-primary)' }}>
@@ -342,10 +478,39 @@ const ParentDashboard = () => {
                     </div>
                     <div className="dashboard-header-actions">
                         <NotificationDropdown />
-                        <div className="glass-panel" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <TrendingUp size={18} className="text-brand" />
-                            <div style={{ fontSize: '0.875rem', fontWeight: '600', display: 'none' }}>Real-time Sync Active</div>
-                        </div>
+                        <motion.div 
+                            onClick={handleSync}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="glass-panel" 
+                            style={{ 
+                                padding: '0.5rem 1rem', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '0.75rem',
+                                cursor: syncing ? 'wait' : 'pointer',
+                                border: syncing ? '1px solid var(--brand-primary)' : '1px solid var(--border-color)',
+                                transition: 'all 0.3s ease'
+                            }}
+                        >
+                            <motion.div
+                                animate={syncing ? { rotate: 360 } : { rotate: 0 }}
+                                transition={syncing ? { repeat: Infinity, duration: 1, ease: "linear" } : { duration: 0.5 }}
+                                style={{ display: 'flex', alignItems: 'center' }}
+                            >
+                                <TrendingUp size={18} className={syncing ? "text-brand-primary" : "text-brand"} />
+                            </motion.div>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <div style={{ fontSize: '0.75rem', fontWeight: '800', color: syncing ? 'var(--brand-primary)' : 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                    {syncing ? 'Syncing...' : 'Live Sync'}
+                                    {!syncing && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />}
+                                </div>
+                                <div style={{ fontSize: '0.6rem', color: 'var(--text-light)', fontWeight: '600' }}>
+                                    {syncing ? 'Fetching data...' : `Last: ${lastSynced.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
                 </header>
 
@@ -385,6 +550,8 @@ const ParentDashboard = () => {
                         <Route path="/" element={<SummaryView childrenData={childrenData} selectedChildId={selectedChildId} loading={loading} />} />
                         <Route path="/history" element={<HistoryView childrenData={childrenData} selectedChildId={selectedChildId} />} />
                         <Route path="/leaves" element={<LeavesView childrenData={childrenData} selectedChildId={selectedChildId} />} />
+                        <Route path="/academic" element={<AcademicView childrenData={childrenData} selectedChildId={selectedChildId} />} />
+                        <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </div>
             </main>

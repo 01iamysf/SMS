@@ -74,8 +74,7 @@ const userSchema = new mongoose.Schema({
             'exportAttendance',
             'bypassTimeRestraint',
             // Keeping older ones just in case 
-            'applyLeave', 'viewReports', 'manageStudents', 'manageSystem',
-            'scanQR', 'generateQR'
+            'applyLeave', 'viewReports', 'manageStudents', 'manageSystem'
         ],
     }],
     classCoordinatorFor: {

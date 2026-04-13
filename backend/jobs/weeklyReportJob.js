@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import Attendance from '../models/Attendance.js';
 import sendEmail from '../services/emailService.js';
 import SystemSetting from '../models/SystemSetting.js';
+import Notification from '../models/Notification.js';
 
 const runWeeklyJob = () => {
     // Run every Friday at 18:00 (6 PM)
@@ -103,6 +104,10 @@ const runWeeklyJob = () => {
 </html>
 `;
 
+                const message = isLowAttendance
+                    ? `Warning: The attendance for ${student.name} is below the required 75% threshold.`
+                    : `This is the weekly attendance summary for ${student.name}.`;
+
                 // 1. Send to Student
                 if (student.email) {
                     await sendEmail({
@@ -133,6 +138,25 @@ const runWeeklyJob = () => {
                         message,
                         html,
                         from: universityEmail ? `University Admin <${universityEmail}>` : undefined
+                    });
+                }
+
+                // 4. In-App Notifications
+                // To Student
+                await Notification.create({
+                    userId: student._id,
+                    message: `📊 Your weekly attendance report is now available. Rate: ${percentage}%`,
+                    type: 'info',
+                    link: '/student'
+                });
+
+                // To Parent
+                if (student.parentId) {
+                    await Notification.create({
+                        userId: student.parentId,
+                        message: `📊 Weekly attendance report for ${student.name} is now available. Rate: ${percentage}%`,
+                        type: 'info',
+                        link: '/parent'
                     });
                 }
             }
