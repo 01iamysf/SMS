@@ -2,7 +2,7 @@
 
 A modern, full-stack Student Attendance Management System designed for attendance tracking, leave management, and academic organization — featuring a premium dark theme, responsive mobile-first UI, and multi-role dashboards.
 
-A college project
+### A college project.......
 
 ---
 
