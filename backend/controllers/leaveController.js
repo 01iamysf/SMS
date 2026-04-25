@@ -10,13 +10,28 @@ import Notification from '../models/Notification.js';
  */
 export const applyLeave = async (req, res) => {
     try {
-        const { startDate, endDate, reason } = req.body;
+        const { leaveType, startDate, endDate, reason, extensionFor } = req.body;
+        
+        // Handle document upload path
+        let documentUrl = '';
+        if (req.file) {
+            // Replace backslashes with forward slashes for URLs
+            documentUrl = req.file.path.replace(/\\/g, '/');
+        }
+
+        if (extensionFor && leaveType !== 'Medical') {
+            return res.status(400).json({ message: 'Only Medical leaves can be extended.' });
+        }
+
         const leave = await LeaveRequest.create({
             userId: req.user._id,
             role: req.user.role,
+            leaveType: leaveType || 'Casual',
             startDate,
             endDate,
-            reason
+            reason,
+            documentUrl,
+            extensionFor: extensionFor || undefined
         });
         res.status(201).json({ message: 'Leave application submitted successfully', leave });
 

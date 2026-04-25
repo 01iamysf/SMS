@@ -12,9 +12,22 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 const test = async () => {
     try {
         console.log('--- Manual Test for Student-1 ---');
-        // Override the docker MONGO_URI from .env for local testing
+        
+        // Use a more robust URI and shorter timeout
         const mongoUri = process.env.MONGO_URI ? process.env.MONGO_URI.replace('mongo:', '127.0.0.1:') : 'mongodb://127.0.0.1:27017/attendance_system';
-        await mongoose.connect(mongoUri);
+        
+        let isConnected = false;
+        try {
+            console.log('Connecting to MongoDB...');
+            await mongoose.connect(mongoUri, { 
+                serverSelectionTimeoutMS: 2000 // 2 second timeout for faster feedback
+            });
+            isConnected = true;
+            console.log('✅ Connected to MongoDB');
+        } catch (err) {
+            console.warn('⚠️  MongoDB Connection Failed. Proceeding with default settings...');
+            console.warn('   (Run "docker-compose up -d mongo" if you want to use database settings)');
+        }
 
         const testData = {
             studentName: 'Student-1',
@@ -86,8 +99,15 @@ const test = async () => {
 </html>
 `;
 
-        const universityEmailSetting = await SystemSetting.findOne({ key: 'universityEmail' });
-        const universityEmail = universityEmailSetting ? universityEmailSetting.value : null;
+        let universityEmail = null;
+        if (isConnected) {
+            try {
+                const universityEmailSetting = await SystemSetting.findOne({ key: 'universityEmail' });
+                universityEmail = universityEmailSetting ? universityEmailSetting.value : null;
+            } catch (err) {
+                console.warn('⚠️  Error fetching universityEmail setting, using defaults.');
+            }
+        }
 
         console.log('Attempting to send email...');
         await sendEmail({
@@ -101,9 +121,10 @@ const test = async () => {
         console.log('✅ Test email successfully sent to: ' + testData.parentEmail);
         process.exit(0);
     } catch (err) {
-        console.error('❌ Test failed:', err);
+        console.error('❌ Test failed with a fatal error:', err);
         process.exit(1);
     }
+
 };
 
 test();

@@ -5,13 +5,16 @@ import mongoose from 'mongoose';
  * @typedef {Object} LeaveRequest
  * @property {ObjectId} userId - Ref to User (Student/Teacher) applying for leave
  * @property {String} role - Role of the applicant ('teacher' or 'student')
+ * @property {String} leaveType - Type of leave ('Casual', 'Medical', 'Emergency', 'Other')
  * @property {Date} startDate - Start date of the leave
  * @property {Date} endDate - End date of the leave
  * @property {String} reason - Detailed reason for the leave
+ * @property {String} documentUrl - URL/path to the uploaded document
  * @property {String} status - Enum: 'pending', 'approved', 'rejected', 'revoked'
  * @property {ObjectId} approvedBy - Ref to User (Coordinator/Admin) who took action
  * @property {ObjectId} revokedBy - Ref to User who revoked the leave
  * @property {String} revocationReason - Reason for revoking an approved leave
+ * @property {ObjectId} extensionFor - Ref to original LeaveRequest if this is an extension
  */
 const leaveRequestSchema = new mongoose.Schema({
     userId: {
@@ -24,6 +27,12 @@ const leaveRequestSchema = new mongoose.Schema({
         enum: ['teacher', 'student'],
         required: true,
     },
+    leaveType: {
+        type: String,
+        enum: ['Casual', 'Medical', 'Emergency', 'Other'],
+        required: true,
+        default: 'Casual'
+    },
     startDate: {
         type: Date,
         required: true,
@@ -35,6 +44,9 @@ const leaveRequestSchema = new mongoose.Schema({
     reason: {
         type: String,
         required: true,
+    },
+    documentUrl: {
+        type: String,
     },
     status: {
         type: String,
@@ -51,6 +63,10 @@ const leaveRequestSchema = new mongoose.Schema({
     },
     revocationReason: {
         type: String,
+    },
+    extensionFor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'LeaveRequest'
     }
 }, {
     timestamps: true,

@@ -769,7 +769,19 @@ const LeaveApprovals = () => {
                         <div key={leave._id} className="glass-panel" style={{ padding: '1.25rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                                 <div>
-                                    <h4 style={{ fontWeight: '700', fontSize: '1rem' }}>{leave.userId?.name}</h4>
+                                    <h4 style={{ fontWeight: '700', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                        {leave.userId?.name}
+                                        {leave.leaveType && (
+                                            <span style={{ fontSize: '0.65rem', padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'rgba(99,102,241,0.15)', color: 'var(--brand-primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                                {leave.leaveType}
+                                            </span>
+                                        )}
+                                        {leave.extensionFor && (
+                                            <span style={{ fontSize: '0.65rem', padding: '0.15rem 0.5rem', borderRadius: '4px', background: 'rgba(139,92,246,0.2)', color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '800' }}>
+                                                EXTENSION
+                                            </span>
+                                        )}
+                                    </h4>
                                     <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Roll: {leave.userId?.rollNumber}</p>
                                 </div>
                                 <div className={`badge badge-${(new Date() > new Date(leave.endDate) && leave.status === 'approved') ? 'secondary' : leave.status === 'approved' ? 'success' : leave.status === 'pending' ? 'warning' : 'danger'}`}>
@@ -785,6 +797,11 @@ const LeaveApprovals = () => {
                                 <div>
                                     <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>Reason</label>
                                     <p>{leave.reason}</p>
+                                    {leave.documentUrl && (
+                                        <a href={`http://localhost:5000/${leave.documentUrl}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--brand-primary)', textDecoration: 'none', background: 'rgba(99,102,241,0.1)', padding: '0.2rem 0.6rem', borderRadius: '4px' }}>
+                                            <FileBarChart2 size={12} /> View Attached Document
+                                        </a>
+                                    )}
                                 </div>
                             </div>
 

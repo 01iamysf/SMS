@@ -3,12 +3,13 @@ import {
     applyLeave, getMyLeaves, getCoordinatorLeaves, approveLeave, rejectLeave, revokeLeave
 } from '../controllers/leaveController.js';
 import { protect, authorizeRoles } from '../middleware/authMiddleware.js';
+import upload from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
 
 router.use(protect);
 
-router.post('/apply', applyLeave);
+router.post('/apply', upload.single('document'), applyLeave);
 router.get('/my-leaves', getMyLeaves);
 
 // Coordinator Routes
