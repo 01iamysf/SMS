@@ -1,23 +1,25 @@
-# Environment files — never commit secrets
+# Environment files
 .env
-.env.local
-.env.production
-.env.*.local
+backend/.env
+frontend/.env
+*.env
 
-# Dependencies
+# Node modules
 node_modules/
+backend/node_modules/
+frontend/node_modules/
 
 # Build output
-dist/
-dist-ssr/
+frontend/dist/
+backend/dist/
 
 # Logs
 *.log
 npm-debug.log*
 
-# OS
+# OS files
 .DS_Store
+Thumbs.db
 
-# Editor
-.vscode/*
-!.vscode/extensions.json
+# Docker
+docker-compose.override.yml
