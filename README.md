@@ -1,6 +1,6 @@
 # 🏫 iAttend
 
-A modern, full-stack Student Attendance Management System designed for attendance tracking, leave management, and academic organization — featuring a premium dark theme, responsive mobile-first UI, and multi-role dashboards.
+A modern, full-stack Student Attendance Management System designed for attendance tracking, leave management, and academic organization — featuring a premium dark theme, responsive mobile-first UI, multi-role dashboards, and robust Dockerized security.
 
 ### A college project.......
 
@@ -10,12 +10,12 @@ A modern, full-stack Student Attendance Management System designed for attendanc
 
 - **Multi-Role Authentication** — Admin, Teacher, Student, and Parent accounts
 - **Attendance Management** — Manual marking with automated email notifications
-- **Leave System** — Apply, approve, and track leaves with automatic attendance adjustment
+- **Leave System** — Apply, approve, and track leaves with automatic attendance adjustment and medical document uploads
 - **Academic Setup** — Manage departments, classes, subjects, and teacher allocations
 - **Parent Dashboard** — Track performance and attendance for multiple children
 - **Interactive Reports** — Visual analytics and history logs
 - **Dark / Light Theme** — Toggle between premium dark and clean light modes
-- **Fully Responsive** — Works seamlessly on desktop, tablet, and mobile devices
+- **Production-Ready Security** — Hardened Docker containers, MongoDB authentication, and strict CORS policies.
 
 ---
 
@@ -23,40 +23,30 @@ A modern, full-stack Student Attendance Management System designed for attendanc
 
 ```text
 .
-├── backend/                 # Node.js + Express + MongoDB API
+├── backend/                 # Node.js + Express API
 │   ├── controllers/         # Business logic for all routes
 │   ├── models/              # Mongoose schemas (User, Attendance, etc.)
 │   ├── routes/              # API entry points
-│   ├── middleware/          # Auth and error handling
-│   └── tools/               # Diagnostic and utility scripts
+│   └── seedAdmin.js         # Script to initialize the first admin user
 │
 ├── frontend/                # React + Vite
 │   ├── src/
 │   │   ├── pages/           # Page components (Role-specific dashboards)
-│   │   ├── components/      # Reusable UI components
-│   │   └── services/        # API integration layers
+│   │   └── components/      # Reusable UI components
 │
+├── docker-compose.yml       # Orchestrates MongoDB, Backend, and Frontend
 └── README.md
 ```
 
 ---
 
-## 🛠️ Local Development Setup (Step-by-Step)
+## 🛠️ Quick Start Guide (Using Docker)
 
-Follow these steps to clone the project, install all dependencies, and run it locally on your machine.
+The easiest and most secure way to run this project is using Docker Compose. This will automatically spin up the database, the backend API, and the frontend React app all connected together securely.
 
 ### Prerequisites
 
-Make sure you have the following installed:
-
-| Tool | Version | Download |
-|---|---|---|
-| **Node.js** | v18 or higher | [nodejs.org](https://nodejs.org/) |
-| **npm** | v9 or higher | Comes with Node.js |
-| **MongoDB** | v6+ | See database options below |
-| **Git** | Any recent version | [git-scm.com](https://git-scm.com/) |
-
----
+Make sure you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed on your machine.
 
 ### Step 1 — Clone the Repository
 
@@ -65,191 +55,77 @@ git clone https://github.com/01iamysf/SMS.git
 cd SMS
 ```
 
----
+### Step 2 — Set Up Environment Variables
 
-### Step 2 — Set Up MongoDB
+Your backend requires configuration variables (like the database password and email settings) to run.
+We have provided a template for you.
 
-You need a running MongoDB instance. Choose **one** of the following options:
+1. Navigate to the backend folder:
+   ```bash
+   cd backend
+   ```
+2. Copy the example file to create your actual `.env` file:
+   ```bash
+   cp .env.example .env
+   ```
+3. Open `.env` in a text editor and fill in any required passwords (especially your Gmail App Password if you want email notifications to work). Keep the `MONGO_URI` exactly as it is in the template for Docker.
 
-#### Option A: Using Docker (Recommended)
+### Step 3 — Build and Start the Containers
 
-```bash
-# Pull and start MongoDB container
-docker run -d --name mongodb -p 27017:27017 mongo:latest
-
-# Verify it's running
-docker ps
-```
-
-> To start it again later: `docker start mongodb`
-
-#### Option B: Local MongoDB Installation
-
-Install MongoDB Community Edition for your OS from [mongodb.com/try/download](https://www.mongodb.com/try/download/community), then start the service:
+Return to the root directory (where `docker-compose.yml` is located) and start everything up:
 
 ```bash
-# Linux
-sudo systemctl start mongod
-
-# macOS (Homebrew)
-brew services start mongodb-community
+cd ..
+docker-compose up -d --build
 ```
+*Note: The first time you run this, it will take a few minutes to download the node images and install dependencies.*
 
-#### Option C: MongoDB Atlas (Cloud)
+### Step 4 — Initialize the Admin User
 
-1. Create a free cluster at [cloud.mongodb.com](https://cloud.mongodb.com/)
-2. Get your connection string (it will look like `mongodb+srv://username:password@cluster.xxxxx.mongodb.net/attendance_system`)
-3. Use this as your `MONGO_URI` in the next step
-
----
-
-### Step 3 — Backend Setup
+Because the database is completely empty on a fresh install, you need to create your first Administrator account to be able to log in. Run the included seed script inside the running backend container:
 
 ```bash
-# Navigate to the backend directory
-cd backend
-
-# Install all dependencies
-npm install
+docker exec backend node seedAdmin.js
 ```
 
-#### Create the Environment File
+This will securely create your default admin user:
+- **Email:** `admin@example.com`
+- **Password:** `admin123`
 
-Create a file named `.env` inside the `backend/` folder:
+### Step 5 — Open the App!
 
-```bash
-touch .env
-```
+Open your web browser and navigate to:
+**http://localhost:5173**
 
-Add the following variables to it (edit with your own values):
-
-```env
-NODE_ENV=development
-PORT=5000
-
-# Database
-MONGO_URI=mongodb://127.0.0.1:27017/attendance_system
-
-# Authentication
-JWT_SECRET=your_jwt_secret_key_here
-JWT_EXPIRE=30d
-
-# SMTP Email Configuration (Gmail)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_EMAIL=your_gmail@gmail.com
-SMTP_PASSWORD=your_gmail_app_password
-FROM_EMAIL=your_gmail@gmail.com
-FROM_NAME="School Management System"
-```
-
-> **📧 Gmail App Password:**
-> Gmail requires an **App Password** instead of your regular password.
-> Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) to generate one.
-> You need 2-Step Verification enabled on your Google account first.
-
-#### Start the Backend Server
-
-```bash
-npm run dev
-```
-
-You should see:
-
-```
-Server running on port 5000
-MongoDB Connected: 127.0.0.1
-```
-
-> ✅ Keep this terminal open and running.
+You can now log in using the admin credentials generated in Step 4.
 
 ---
 
-### Step 4 — Frontend Setup
+## 🔧 Shutting Down & Cleaning Up
 
-Open a **new terminal** window/tab:
-
+To stop the servers, run:
 ```bash
-# Navigate to the frontend directory
-cd frontend
-
-# Install all dependencies
-npm install
-
-# Start the development server
-npm run dev
+docker-compose down
 ```
 
-You should see:
-
-```
-VITE v6.x.x  ready in xxx ms
-
-➜  Local:   http://localhost:5173/
-```
-
-> ✅ Keep this terminal open too.
-
----
-
-### Step 5 — Open in Browser
-
-Open your browser and go to:
-
-```
-http://localhost:5173
-```
-
-🎉 **That's it!** The application should be fully running.
-
----
-
-## 📋 Quick Start Summary
-
-For those who just want the commands:
-
+**⚠️ Important Note for Developers:** 
+If you want to completely wipe your local database and start completely fresh, use the `-v` flag:
 ```bash
-# Clone
-git clone https://github.com/01iamysf/SMS.git
-cd SMS
-
-# Backend
-cd backend
-npm install
-# Create .env file (see above for required variables)
-npm run dev
-
-# Frontend (in a new terminal)
-cd frontend
-npm install
-npm run dev
-
-# Open http://localhost:5173 in your browser
+docker-compose down -v
 ```
+*(If you do this, you will need to run the `seedAdmin.js` script again the next time you start the app, because your admin user will be deleted).*
 
 ---
 
-## 🔧 Troubleshooting
+## 🛡️ Security Features Included
 
-| Problem | Solution |
-|---|---|
-| `ECONNREFUSED 127.0.0.1:27017` | MongoDB is not running. Start it with `docker start mongodb` or `sudo systemctl start mongod` |
-| `Cannot find module` errors | Run `npm install` again in the affected directory (`backend/` or `frontend/`) |
-| Frontend shows blank page | Make sure the backend is running on port 5000 first |
-| SMTP email errors | Verify your Gmail App Password is correct and 2FA is enabled |
-| `Port 5000 already in use` | Kill the existing process: `kill $(lsof -t -i:5000)` or change `PORT` in `.env` |
-
----
-
-## 🛡️ Security
-
-- JWT-based authentication
-- Granular, permission-based access control
-- Role-based route protection on both frontend and backend
+- **MongoDB Authentication:** The database requires credentials and does not expose its port to the public internet.
+- **Root-less Containers:** The backend container drops root privileges and runs as a restricted `node` user.
+- **Strict CORS Policy:** The backend explicitly rejects requests from unauthorized frontend domains.
+- **Secure Secret Management:** All `.env` files are strictly ignored by Git to prevent accidental credential leaks.
 
 ---
 
 ## 📄 License
 
 This project is for educational purposes.
-
